@@ -1,0 +1,392 @@
+
+import oracledb
+
+# Configuración de conexión
+host = 'localhost'
+port = 1521
+service_name = 'CursoOracle'
+user = 'ompl'
+password = 'ompl'
+dsn = f"{host}:{port}/{service_name}"
+
+def conectar():
+    return oracledb.connect(user=user, password=password, dsn=dsn)
+
+# === CONSULTAS ===
+
+def consulta_detalle_orden():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        id_orden = int(input("ID de orden: "))
+        out_cur = cursor.var(oracledb.CURSOR)
+        cursor.callproc("SP_ObtenerDetalleOrden", [id_orden, out_cur])
+        rows = out_cur.getvalue().fetchall()
+        if not rows:
+            print("⚠️ No se encontraron detalles para esa orden.")
+        else:
+            for r in rows: print(r)
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.close()
+
+def consulta_ordenes_por_fecha():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        inicio = input("Fecha inicio (DD-MM-YYYY): ")
+        fin    = input("Fecha fin    (DD-MM-YYYY): ")
+        out_cur = cursor.var(oracledb.CURSOR)
+        cursor.callproc("SP_ObtenerOrdenesPorFecha", [inicio, fin, out_cur])
+        rows = out_cur.getvalue().fetchall()
+        if not rows:
+            print("⚠️ No se encontraron órdenes en ese rango.")
+        else:
+            for r in rows: print(r)
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.close()
+
+def consulta_stock_por_categoria():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        cat = input("ID categoría (vacío=all): ").strip()
+        idc = int(cat) if cat else None
+        out_cur = cursor.var(oracledb.CURSOR)
+        cursor.callproc("SP_ReporteStockPorCategoria", [idc, out_cur])
+        rows = out_cur.getvalue().fetchall()
+        if not rows:
+            print("⚠️ No hay stock para esa categoría.")
+        else:
+            for r in rows: print(r)
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.close()
+
+def consulta_info_producto():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        pid = int(input("ID producto: "))
+        o1 = cursor.var(str); o2 = cursor.var(float)
+        o3 = cursor.var(str); o4 = cursor.var(int)
+        cursor.callproc("SP_ObtenerInfoProducto", [pid, o1, o2, o3, o4])
+        print(f"Nombre: {o1.getvalue()}")
+        print(f"Precio: {o2.getvalue()}")
+        print(f"Cat.:   {o3.getvalue()}")
+        print(f"Stock:  {o4.getvalue()}")
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.close()
+
+# === INSERCIÓN / REGISTRO ===
+
+def insertar_cliente():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        rs = input("Razón social: ")
+        dr = input("Dirección: ")
+        em = input("Email: ")
+        tel= int(input("Teléfono: "))
+        cel= int(input("Celular: "))
+        cursor.callproc("sp_insertar_cliente", [rs, dr, em, tel, cel])
+        print("✅ Cliente insertado.")
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.commit(); conn.close()
+
+def insertar_producto():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        pr = float(input("Precio unitario: "))
+        nm = input("Nombre prod.: ")
+        ex = int(input("Existencia: "))
+        un = input("Unidad: ")
+        ds = input("Descripción: ")
+        cb = input("Cód. de barra: ")
+        rf = input("RFID: ")
+        cat= int(input("ID categoría: "))
+        lt = int(input("ID lote: "))
+        ub = int(input("ID ubicación: "))
+        cursor.callproc("sp_insertar_producto", [pr, nm, ex, un, ds, cb, rf, cat, lt, ub])
+        print("✅ Producto insertado.")
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.commit(); conn.close()
+
+def insertar_proveedor():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        rs = input("Razón social: ")
+        ruc= int(input("RUC: "))
+        em = input("Email: ")
+        dr = input("Dirección: ")
+        tel= int(input("Teléfono: "))
+        cursor.callproc("sp_insertar_proveedor", [rs, ruc, em, dr, tel])
+        print("✅ Proveedor insertado.")
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.commit(); conn.close()
+
+def insertar_usuario():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        nm = input("Nombre usuario: ")
+        em = input("Email: ")
+        pw = input("Password: ")
+        rl = int(input("ID Rol: "))
+        cursor.callproc("sp_insertar_usuario", [nm, em, pw, rl])
+        print("✅ Usuario insertado.")
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.commit(); conn.close()
+
+def flujo_completar_orden():
+    try:
+        conn = conectar()
+        cursor = conn.cursor()
+
+        # Paso 1: Insertar orden
+        cliente_id = int(input("ID del cliente para la orden: "))
+        cursor.callproc("sp_insertar_orden", [cliente_id])
+        conn.commit()
+        print("✅ Orden creada.")
+
+        # Paso 2: Obtener ID de la orden más reciente
+        cursor.execute("SELECT MAX(idOrden) FROM orden WHERE cliente_idCliente = :1", [cliente_id])
+        id_orden = cursor.fetchone()[0]
+        print(f"🆔 ID de la nueva orden: {id_orden}")
+
+        # Paso 3: Insertar uno o más detalles
+        while True:
+            agregar = input("¿Agregar producto a la orden? (s/n): ").lower()
+            if agregar != 's':
+                break
+            id_prod = int(input("ID producto: "))
+            cant = int(input("Cantidad: "))
+            try:
+                cursor.callproc("insertar_detalle_orden", [id_orden, id_prod, cant])
+                conn.commit()
+                print("🛒 Producto agregado.")
+            except Exception as e:
+                print("❌ Error al insertar producto:", e)
+
+        # Paso 4: Aprobar orden
+        aprobar = input("¿Deseas aprobar la orden ahora? (s/n): ").lower()
+        if aprobar == 's':
+            cursor.callproc("aprob_orden", [id_orden])
+            conn.commit()
+            print("✅ Orden aprobada correctamente.")
+
+    except oracledb.Error as e:
+        print("❌ Error general en el flujo de orden:", e)
+    finally:
+        if 'conn' in locals():
+            conn.close()
+            
+def insertar_evaluacion():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        fd = input("Fecha eval. (DD-MM-YYYY): ")
+        ca = int(input("Calificación: "))
+        ob = input("Observación: ")
+        pr = int(input("ID Proveedor: "))
+        cursor.callproc("sp_insertar_evaluacion_proveedor", [f"TO_DATE('{fd}','DD-MM-YYYY')", ca, ob, pr])
+        print("- Evaluación insertada. -")
+    except oracledb.Error as e:
+        print("Error:", e)
+    finally:
+        conn.commit(); conn.close()
+
+def registrar_movimiento():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        tm = input("Tipo mov.: ")
+        fd = input("Fecha mov. (DD-MM-YYYY): ")
+        ca = int(input("Cantidad: "))
+        mo = input("Motivo: ")
+        us = int(input("ID Usuario: "))
+        pr = int(input("ID Producto: "))
+        cursor.callproc("sp_registrar_movimiento", [tm, f"TO_DATE('{fd}','DD-MM-YYYY')", ca, mo, us, pr])
+        print("- Movimiento registrado. -")
+    except oracledb.Error as e:
+        print("Error:", e)
+    finally:
+        conn.commit(); conn.close()
+
+# === ACTUALIZACIONES ===
+
+def cambiar_cod_barra_producto():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        p_IDProducto = int(input("Ingresa ID de producto a modificar: "))
+        p_NuevoCodigoBarra = input("Ingresa nuevo codigo de barra: ")
+        cursor.callproc("CambiarCodigoBarraProducto", [p_IDProducto, p_NuevoCodigoBarra])
+        print(f"✅ Codigo de barra de producto {p_IDProducto} actualizado")
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.commit(); conn.close()
+
+def cambiar_descript_producto():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        p_IDProducto = int(input("Ingresa ID de producto a modificar: "))
+        p_NuevaDescripcion = input("Ingresa nueva descripción:\n")
+        cursor.callproc("CambiarDescripcionProducto", [p_IDProducto, p_NuevaDescripcion])
+        print(f"✅ Descripcion de producto {p_IDProducto} actualizada")
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.commit(); conn.close()
+
+def cambiar_direccion_cliente():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        p_IDCliente = int(input("Ingresa ID de cliente a modificar: "))
+        p_NuevaDireccion = input("Ingresa nueva dirección: ")
+        cursor.callproc("CambiarDireccionCliente", [p_IDCliente, p_NuevaDireccion])
+        print(f"✅ Direccion de cliente {p_IDCliente} actualizado")
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.commit(); conn.close()
+
+def cambiar_nombre_usuario():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        p_IDUsuario = int(input("Ingresa ID de usuario a modificar: "))
+        p_NuevoNombre = input("Ingresa nuevo nombre: ")
+        cursor.callproc("CambiarNombreUsuario",[p_IDUsuario,p_NuevoNombre])
+        print(f"✅ Nombre del usuario {p_IDUsuario} actualizado")
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.commit(); conn.close()
+
+def cambiar_lote_producto():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        p_IDProducto = int(input("Ingresa ID de producto a modificar: "))
+        p_NuevoIDLote = int(input("Ingresa ID del nuevo lote: "))
+        cursor.callproc("CambiarLoteProducto",[p_IDProducto,p_NuevoIDLote])
+        print(f"✅ Lote de producto {p_IDProducto} actualizado")
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.commit(); conn.close()
+
+def aumentar_lote_producto():
+    conn = conectar(); cursor = conn.cursor()
+    try:
+        p_IDProducto = int(input("Ingresa ID de producto a modificar: "))
+        p_Aumento = int(input("Ingresa cantidad a incrementar al lote: "))
+        cursor.callproc("AumentarLoteProducto",[p_IDProducto,p_Aumento])
+        print(f"✅ Lote del producto {p_IDProducto} incrementado")
+    except oracledb.Error as e:
+        print("❌", e)
+    finally:
+        conn.commit(); conn.close()
+
+
+# === MENÚS ===
+
+def menu_consultas():
+    opts = {
+        '1': consulta_detalle_orden,
+        '2': consulta_ordenes_por_fecha,
+        '3': consulta_stock_por_categoria,
+        '4': consulta_info_producto
+    }
+    while True:
+        print("\\n--- CONSULTAS ---")
+        print("1) Detalle de orden")
+        print("2) Órdenes por fecha")
+        print("3) Stock por categoría")
+        print("4) Info de producto")
+        print("5) Volver")
+        op = input("Opción: ")
+        if op == '5': break
+        func = opts.get(op)
+        if func: func()
+        else: print("Opción inválida")
+
+def menu_inserciones():
+    opts = {
+        '1': insertar_cliente,
+        '2': insertar_producto,
+        '3': insertar_proveedor,
+        '4': insertar_usuario,
+        '5': flujo_completar_orden,
+        '6': insertar_evaluacion,
+        '7': registrar_movimiento
+    }
+    while True:
+        print("\\n--- INSERCIÓN / REGISTRO ---")
+        print("1) Insertar cliente")
+        print("2) Insertar producto")
+        print("3) Insertar proveedor")
+        print("4) Insertar usuario")
+        print("5) Flujo completo de orden")
+        print("6) Insertar evaluación")
+        print("7) Registrar movimiento")
+        print("8) Volver")
+        op = input("Opción: ")
+        if op == '8': break
+        func = opts.get(op)
+        if func: func()
+        else: print("Opción inválida")
+
+def menu_actualizaciones():
+    opts = {
+        '1': cambiar_cod_barra_producto,
+        '2': cambiar_descript_producto,
+        '3': cambiar_direccion_cliente,
+        '4': cambiar_nombre_usuario,
+        '5': cambiar_lote_producto,
+        '6': aumentar_lote_producto
+    }
+    while True:
+        print("\\n--- ACTUALIZACIONES ---")
+        print("1) Cambiar codigo de barra de un producto")
+        print("2) Cambiar descripción de un producto")
+        print("3) Cambiar direccion de un cliente")
+        print("4) Cambiar nombre de un usuario")
+        print("5) Cambiar lote de un producto")
+        print("6) Aumentar lote de un producto")
+        print("7) Volver")
+        op = input("Opción: ")
+        if op == '7': break
+        func = opts.get(op)
+        if func: func()
+        else: print("Opción inválida")
+
+def main_menu():
+    while True:
+        print("\\n=== APLICACIÓN ORACLE ===")
+        print("1) Ejecutar consultas")
+        print("2) Ejecutar inserciones/registro")
+        print("3) Ejecutar actualizaciones")
+        print("4) Salir")
+        op = input("Elige: ")
+        if op == '1':
+            menu_consultas()
+        elif op == '2':
+            menu_inserciones()
+        elif op == '3':
+            menu_actualizaciones()
+        elif op == '4':
+            print("¡Hasta luego!")
+            break
+        else:
+            print("Opción inválida")
+
+if __name__ == "__main__":
+    main_menu()
+aplicacion4.py
+Mostrando aplicacion4.py.
