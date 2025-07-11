@@ -1,0 +1,2052 @@
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--CREACION DE TABLAS----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE Rol 
+    ( 
+     idRol     INTEGER  NOT NULL , 
+     nombreRol VARCHAR2 (20) , 
+     activo    VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE Rol 
+    ADD CONSTRAINT Rol_PK PRIMARY KEY ( idRol ) ;
+
+CREATE SEQUENCE Rol_idRol_SEQ 
+START WITH 1 
+    NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER Rol_idRol_TRG 
+BEFORE INSERT ON Rol 
+FOR EACH ROW 
+WHEN (NEW.idRol IS NULL) 
+BEGIN 
+    :NEW.idRol := Rol_idRol_SEQ.NEXTVAL; 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE Usuario 
+    ( 
+     idUsuario     INTEGER  NOT NULL , 
+     nombreUsuario VARCHAR2 (50) , 
+     email         VARCHAR2 (100) , 
+     contrasena    VARCHAR2 (100) , 
+     Rol_idRol     INTEGER  NOT NULL , 
+     activo        VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE Usuario 
+    ADD CONSTRAINT Usuario_PK PRIMARY KEY ( idUsuario ) ;
+
+ALTER TABLE Usuario 
+    ADD CONSTRAINT Usuario_Rol_FK FOREIGN KEY 
+    ( 
+     Rol_idRol
+    ) 
+    REFERENCES Rol 
+    ( 
+     idRol
+    ) 
+;
+
+CREATE SEQUENCE Usuario_idUsuario_SEQ 
+START WITH 1 
+    NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER Usuario_idUsuario_TRG 
+BEFORE INSERT ON Usuario 
+FOR EACH ROW 
+WHEN (NEW.idUsuario IS NULL) 
+BEGIN 
+    :NEW.idUsuario := Usuario_idUsuario_SEQ.NEXTVAL; 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE Cliente 
+    ( 
+     idCliente   INTEGER  NOT NULL , 
+     razonSocial VARCHAR2 (50) , 
+     direccion   VARCHAR2 (50) , 
+     email       VARCHAR2 (50) , 
+     telefono    INTEGER , 
+     celular     INTEGER , 
+     activo      VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE Cliente 
+    ADD CONSTRAINT Cliente_PK PRIMARY KEY ( idCliente ) ;
+
+CREATE SEQUENCE Cliente_idCliente_SEQ 
+START WITH 1 
+    NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER Cliente_idCliente_TRG 
+BEFORE INSERT ON Cliente 
+FOR EACH ROW 
+WHEN (NEW.idCliente IS NULL) 
+BEGIN 
+    :NEW.idCliente := Cliente_idCliente_SEQ.NEXTVAL; 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE Orden 
+    ( 
+     idOrden           INTEGER  NOT NULL , 
+     subtotalOrden     NUMBER (10,2) , 
+     descuento         NUMBER (10,2) , 
+     impuesto          NUMBER (10,2) , 
+     importeTotal      NUMBER (10,2) , 
+     fechaSolicitud    DATE , 
+     fechaAprob        DATE , 
+     fechaEntrega      DATE , 
+     estado            VARCHAR2 (50) , 
+     Cliente_idCliente INTEGER  NOT NULL , 
+     activo            VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE Orden 
+    ADD CONSTRAINT Orden_PK PRIMARY KEY ( idOrden ) ;
+
+ALTER TABLE Orden 
+    ADD CONSTRAINT Orden_Cliente_FK FOREIGN KEY 
+    ( 
+     Cliente_idCliente
+    ) 
+    REFERENCES Cliente 
+    ( 
+     idCliente
+    ) 
+;
+
+CREATE SEQUENCE Orden_idOrden_SEQ 
+START WITH 1 
+    NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER Orden_idOrden_TRG 
+BEFORE INSERT ON Orden 
+FOR EACH ROW 
+WHEN (NEW.idOrden IS NULL) 
+BEGIN 
+    :NEW.idOrden := Orden_idOrden_SEQ.NEXTVAL; 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE Proveedor 
+    ( 
+     idProveedor INTEGER  NOT NULL , 
+     razonSocial VARCHAR2 (50) , 
+     ruc         INTEGER , 
+     email       VARCHAR2 (50) , 
+     direccion   VARCHAR2 (300) , 
+     telefono    INTEGER , 
+     activo      VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE Proveedor 
+    ADD CONSTRAINT Proveedor_PK PRIMARY KEY ( idProveedor ) ;
+
+CREATE SEQUENCE Proveedor_idProveedor_SEQ 
+START WITH 1 
+    NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER Proveedor_idProveedor_TRG 
+BEFORE INSERT ON Proveedor 
+FOR EACH ROW 
+WHEN (NEW.idProveedor IS NULL) 
+BEGIN 
+    :NEW.idProveedor := Proveedor_idProveedor_SEQ.NEXTVAL; 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE Evaluacion 
+    ( 
+     idEvaluacion          INTEGER  NOT NULL , 
+     fechaEvaluacion       DATE , 
+     calificacion          INTEGER , 
+     observacion           VARCHAR2 (300) , 
+     Proveedor_idProveedor INTEGER  NOT NULL , 
+     activo                VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE Evaluacion 
+    ADD CONSTRAINT Evaluacion_PK PRIMARY KEY ( idEvaluacion ) ;
+
+ALTER TABLE Evaluacion 
+    ADD CONSTRAINT Evaluacion_Proveedor_FK FOREIGN KEY 
+    ( 
+     Proveedor_idProveedor
+    ) 
+    REFERENCES Proveedor 
+    ( 
+     idProveedor
+    ) 
+;
+
+CREATE SEQUENCE Evaluacion_idEvaluacion_SEQ 
+START WITH 1 
+    NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER Evaluacion_idEvaluacion_TRG 
+BEFORE INSERT ON Evaluacion 
+FOR EACH ROW 
+WHEN (NEW.idEvaluacion IS NULL) 
+BEGIN 
+    :NEW.idEvaluacion := Evaluacion_idEvaluacion_SEQ.NEXTVAL; 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE Lote 
+    ( 
+     idLote         INTEGER  NOT NULL , 
+     nombreLote     VARCHAR2 (50) , 
+     existenciaLote NUMBER , 
+     fechaCaducLote DATE , 
+     activo         VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE Lote 
+    ADD CONSTRAINT Lote_PK PRIMARY KEY ( idLote ) ;
+
+CREATE SEQUENCE Lote_idLote_SEQ 
+START WITH 1 
+    NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER Lote_idLote_TRG 
+BEFORE INSERT ON Lote 
+FOR EACH ROW 
+WHEN (NEW.idLote IS NULL) 
+BEGIN 
+    :NEW.idLote := Lote_idLote_SEQ.NEXTVAL; 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE Ubicacion 
+    ( 
+     idUbicacion INTEGER  NOT NULL , 
+     estanteria  VARCHAR2 (50) , 
+     almacen     VARCHAR2 (50) , 
+     zona        VARCHAR2 (50) , 
+     activo      VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE Ubicacion 
+    ADD CONSTRAINT Ubicacion_PK PRIMARY KEY ( idUbicacion ) ;
+
+CREATE SEQUENCE Ubicacion_idUbicacion_SEQ 
+START WITH 1 
+    NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER Ubicacion_idUbicacion_TRG 
+BEFORE INSERT ON Ubicacion 
+FOR EACH ROW 
+WHEN (NEW.idUbicacion IS NULL) 
+BEGIN 
+    :NEW.idUbicacion := Ubicacion_idUbicacion_SEQ.NEXTVAL; 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE Categoria 
+    ( 
+     idCategoria     INTEGER  NOT NULL , 
+     nombreCategoria VARCHAR2 (50) , 
+     descripcion     VARCHAR2 (300) , 
+     activo          VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE Categoria 
+    ADD CONSTRAINT Categoria_PK PRIMARY KEY ( idCategoria ) ;
+
+CREATE SEQUENCE Categoria_idCategoria_SEQ 
+START WITH 1 
+    NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER Categoria_idCategoria_TRG 
+BEFORE INSERT ON Categoria 
+FOR EACH ROW 
+WHEN (NEW.idCategoria IS NULL) 
+BEGIN 
+    :NEW.idCategoria := Categoria_idCategoria_SEQ.NEXTVAL; 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE Producto 
+    ( 
+     idProducto            INTEGER  NOT NULL , 
+     precioUnit            NUMBER (10,2) , 
+     nombreProd            VARCHAR2 (100) , 
+     existencia            NUMBER , 
+     unidad                VARCHAR2 (50) , 
+     descripcion           VARCHAR2 (100) , 
+     codigoBarra           VARCHAR2 (50) , 
+     rfid                  VARCHAR2 (50) , 
+     Categoria_idCategoria INTEGER  NOT NULL , 
+     Lote_idLote           INTEGER  NOT NULL , 
+     Ubicacion_idUbicacion INTEGER  NOT NULL , 
+     activo                VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE Producto 
+    ADD CONSTRAINT Producto_PK PRIMARY KEY ( idProducto ) ;
+
+ALTER TABLE Producto 
+    ADD CONSTRAINT Producto_Categoria_FK FOREIGN KEY 
+    ( 
+     Categoria_idCategoria
+    ) 
+    REFERENCES Categoria 
+    ( 
+     idCategoria
+    ) 
+;
+
+ALTER TABLE Producto 
+    ADD CONSTRAINT Producto_Lote_FK FOREIGN KEY 
+    ( 
+     Lote_idLote
+    ) 
+    REFERENCES Lote 
+    ( 
+     idLote
+    ) 
+;
+
+ALTER TABLE Producto 
+    ADD CONSTRAINT Producto_Ubicacion_FK FOREIGN KEY 
+    ( 
+     Ubicacion_idUbicacion
+    ) 
+    REFERENCES Ubicacion 
+    ( 
+     idUbicacion
+    ) 
+;
+
+CREATE SEQUENCE Producto_idProducto_SEQ 
+START WITH 1 
+    NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER Producto_idProducto_TRG 
+BEFORE INSERT ON Producto 
+FOR EACH ROW 
+WHEN (NEW.idProducto IS NULL) 
+BEGIN 
+    :NEW.idProducto := Producto_idProducto_SEQ.NEXTVAL; 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE detalleProveedor 
+    ( 
+     Producto_idProducto   INTEGER  NOT NULL , 
+     Proveedor_idProveedor INTEGER  NOT NULL , 
+     activo                VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE detalleProveedor 
+    ADD CONSTRAINT detalleProveedor_PK PRIMARY KEY ( Producto_idProducto, Proveedor_idProveedor ) ;
+
+ALTER TABLE detalleProveedor 
+    ADD CONSTRAINT detalleProveedor_Producto_FK FOREIGN KEY 
+    ( 
+     Producto_idProducto
+    ) 
+    REFERENCES Producto 
+    ( 
+     idProducto
+    ) 
+;
+
+ALTER TABLE detalleProveedor 
+    ADD CONSTRAINT detalleProveedor_Proveedor_FK FOREIGN KEY 
+    ( 
+     Proveedor_idProveedor
+    ) 
+    REFERENCES Proveedor 
+    ( 
+     idProveedor
+    ) 
+;
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE detalleOrden 
+    ( 
+     cantidadDtl         NUMBER (10) , 
+     precioUnit          NUMBER (10,2) , 
+     subtotalUnit        NUMBER (10,2) , 
+     Orden_idOrden       INTEGER  NOT NULL , 
+     Producto_idProducto INTEGER  NOT NULL , 
+     activo              VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE detalleOrden 
+    ADD CONSTRAINT detalleOrden_Orden_FK FOREIGN KEY 
+    ( 
+     Orden_idOrden
+    ) 
+    REFERENCES Orden 
+    ( 
+     idOrden
+    ) 
+;
+
+ALTER TABLE detalleOrden 
+    ADD CONSTRAINT detalleOrden_Producto_FK FOREIGN KEY 
+    ( 
+     Producto_idProducto
+    ) 
+    REFERENCES Producto 
+    ( 
+     idProducto
+    ) 
+;
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE Movimiento 
+    ( 
+     tipoMov             VARCHAR2 (50) , 
+     fechaMov            DATE , 
+     cantidadMov         NUMBER , 
+     motivo              VARCHAR2 (50) , 
+     Usuario_idUsuario   INTEGER  NOT NULL , 
+     Producto_idProducto INTEGER  NOT NULL , 
+     activo              VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE Movimiento 
+    ADD CONSTRAINT TABLE_15_Producto_FK FOREIGN KEY 
+    ( 
+     Producto_idProducto
+    ) 
+    REFERENCES Producto 
+    ( 
+     idProducto
+    ) 
+;
+
+ALTER TABLE Movimiento 
+    ADD CONSTRAINT TABLE_15_Usuario_FK FOREIGN KEY 
+    ( 
+     Usuario_idUsuario
+    ) 
+    REFERENCES Usuario 
+    ( 
+     idUsuario
+    ) 
+;
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE TABLE Comprobante 
+    ( 
+     idComprobante INTEGER  NOT NULL , 
+     tipoComprob   VARCHAR2 (50) , 
+     fechaEmision  DATE , 
+     comprobFiscal VARCHAR2 (50) , 
+     Orden_idOrden INTEGER  NOT NULL , 
+     activo        VARCHAR2 (1) 
+    ) 
+;
+
+ALTER TABLE Comprobante 
+    ADD CONSTRAINT Comprobante_PK PRIMARY KEY ( idComprobante ) ;
+
+ALTER TABLE Comprobante 
+    ADD CONSTRAINT Comprobante_Orden_FK FOREIGN KEY 
+    ( 
+     Orden_idOrden
+    ) 
+    REFERENCES Orden 
+    ( 
+     idOrden
+    ) 
+;
+
+CREATE SEQUENCE Comprobante_idComprobante_SEQ 
+START WITH 1 
+    NOCACHE 
+    ORDER ;
+
+CREATE OR REPLACE TRIGGER Comprobante_idComprobante_TRG 
+BEFORE INSERT ON Comprobante 
+FOR EACH ROW 
+WHEN (NEW.idComprobante IS NULL) 
+BEGIN 
+    :NEW.idComprobante := Comprobante_idComprobante_SEQ.NEXTVAL; 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--INSERCION DE TABLAS---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO ROL (nombreRol, activo) VALUES ('Administrador', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Vendedor', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Almacenero', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Supervisor', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Invitado', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Analista', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Gerente', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Auditor', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Cliente', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Desarrollador', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Soporte', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Tester', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Operador', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Recepcionista', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Marketing', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Recursos Humanos', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('CEO', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('T�cnico', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Programador', 'S');
+INSERT INTO ROL (nombreRol, activo) VALUES ('Contador', 'S');
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO usuario (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Juan P�rez', 'juan.perez@example.com', 'contrase�a123', 1, 'S');
+INSERT INTO usuario (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Mar�a Rodr�guez', 'maria.rodriguez@example.com', 'contrase�a456', 1, 'S');
+INSERT INTO usuario (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Carlos L�pez', 'carlos.lopez@example.com', 'contrase�a789', 2, 'S');
+INSERT INTO usuario (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Ana Garc�a', 'ana.garcia@example.com', 'contrase�a012', 2, 'S');
+INSERT INTO usuario (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Luis Hern�ndez', 'luis.hernandez@example.com', 'contrase�a345', 1, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Pedro', 'pedro@gmail.com', 'pass123', 6, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Rosa', 'rosa@hotmail.com', 'pass123', 7, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Diego', 'diego@hotmail.com', 'pass123', 8, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Paula', 'paula@gmail.com', 'pass123', 9, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Joel', 'joel@gmail.com', 'pass123', 10, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Andrea', 'andrea@gmail.com', 'pass123', 11, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Kevin', 'kevin@gmail.com', 'pass123', 12, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Sandra', 'sandra@hotmail.com', 'pass123', 13, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('C�sar', 'cesar@hotmail.com', 'pass123', 14, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Fiorella', 'fiorella@gmail.com', 'pass123', 15, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Jos�', 'jose@gmail.com', 'pass123', 16, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Valeria', 'valeria@hotmail.com', 'pass123', 17, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Bruno', 'bruno@hotmail.com', 'pass123', 18, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Estefany', 'estefany@gmail.com', 'pass123', 19, 'S');
+INSERT INTO USUARIO (nombreUsuario, email, contrasena, Rol_idRol, activo) VALUES ('Samuel', 'samuel@gmail.com', 'pass123', 20, 'S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Ewell MacDowall', '3 4th Drive', 'emacdowall0@wordpress.com', 5437832, 938110972,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Olin Rops', '8 Jackson Parkway', 'orops1@fc2.com', 1660991, 942483635,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Alwin Medlar', '6 Montana Court', 'amedlar2@netscape.com', 8510672, 990521051,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Bliss Serotsky', '0 Lerdahl Court', 'bserotsky3@i2i.jp', 9001248, 987103640,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Sula Fewster', '2 Brown Pass', 'sfewster4@nifty.com', 1197752, 950943002,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Davey Doxey', '6598 Maywood Terrace', 'ddoxey5@ox.ac.uk', 5203192, 923571137,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Corinne Bondar', '51 Melrose Trail', 'cbondar6@ocn.ne.jp', 1052179, 900676477,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Lisabeth Llewelyn', '8 Fisk Park', 'lllewelyn7@tinypic.com', 4667917, 983480678,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Valaria Cridge', '30794 Randy Terrace', 'vcridge8@unicef.org', 1350783, 927862950,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Kennan McKeggie', '8 Waywood Circle', 'kmckeggie9@ca.gov', 6457701, 945583714,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Babbette Gumm', '577 Artisan Point', 'bgumma@usgs.gov', 4318317, 916979448,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Alfi Gingell', '85 Marcy Drive', 'agingellb@irs.gov', 8133774, 985831553,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Neall Wyse', '52 Killdeer Alley', 'nwysec@sina.com.cn', 6996508, 953817325,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Sasha Summerside', '683 Swallow Place', 'ssummersided@so-net.ne.jp', 7040267, 990914320,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Aurea Huyton', '8 Rigney Road', 'ahuytone@fda.gov', 3899841, 918589388,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Kimberly Tunn', '6 Monterey Lane', 'ktunnf@reference.com', 4827180, 974313543,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Cally Longshaw', '4 Fallview Avenue', 'clongshawg@trellian.com', 6456690, 975266507,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Horten Gutowska', '9612 Kipling Circle', 'hgutowskah@i2i.jp', 3565632, 943564197,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Finn Trevascus', '90239 Clarendon Lane', 'ftrevascusi@hc360.com', 5535148, 951851655,'S');
+insert into cliente (razonSocial, direccion, email, telefono, celular, activo) values ('Linnell Eliesco', '91 Dawn Alley', 'leliescoj@dyndns.org', 7597349, 945017591,'S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (19.18, 0.00, 1.92, 21.10, (TO_DATE('01-06-2025', 'dd-MM-yyyy')), (TO_DATE('02-06-2025', 'dd-MM-yyyy')), (TO_DATE('02-07-2025', 'dd-MM-yyyy')),'aprobado', 1,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (59.70, 0.00, 2.99, 62.69, (TO_DATE('02-06-2025', 'dd-MM-yyyy')), (TO_DATE('03-06-2025', 'dd-MM-yyyy')), (TO_DATE('03-07-2025', 'dd-MM-yyyy')),'aprobado', 2,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (129.10, 6.46, 0.00, 122.65, (TO_DATE('03-06-2025', 'dd-MM-yyyy')), (TO_DATE('04-06-2025', 'dd-MM-yyyy')), (TO_DATE('04-07-2025', 'dd-MM-yyyy')),'aprobado', 3,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (29.80, 0.00, 2.98, 32.78, (TO_DATE('04-06-2025', 'dd-MM-yyyy')), (TO_DATE('05-06-2025', 'dd-MM-yyyy')), (TO_DATE('05-07-2025', 'dd-MM-yyyy')),'aprobado', 4,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (82.60, 0.00, 4.13, 86.73, (TO_DATE('05-06-2025', 'dd-MM-yyyy')), (TO_DATE('06-06-2025', 'dd-MM-yyyy')), (TO_DATE('06-07-2025', 'dd-MM-yyyy')),'aprobado', 5,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (25.80, 0.00, 2.58, 28.38, (TO_DATE('06-06-2025', 'dd-MM-yyyy')), (TO_DATE('07-06-2025', 'dd-MM-yyyy')), (TO_DATE('07-07-2025', 'dd-MM-yyyy')),'aprobado', 6,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (186.30, 9.32, 0.00, 176.99, (TO_DATE('07-06-2025', 'dd-MM-yyyy')), (TO_DATE('08-06-2025', 'dd-MM-yyyy')), (TO_DATE('08-07-2025', 'dd-MM-yyyy')),'aprobado', 7,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (25.00, 0.00, 2.50, 27.50, (TO_DATE('08-06-2025', 'dd-MM-yyyy')), (TO_DATE('09-06-2025', 'dd-MM-yyyy')), (TO_DATE('09-07-2025', 'dd-MM-yyyy')),'aprobado', 8,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (39.90, 0.00, 3.99, 43.89, (TO_DATE('09-06-2025', 'dd-MM-yyyy')), (TO_DATE('10-06-2025', 'dd-MM-yyyy')), (TO_DATE('10-07-2025', 'dd-MM-yyyy')),'aprobado', 9,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (46.50, 0.00, 4.65, 51.15, (TO_DATE('10-06-2025', 'dd-MM-yyyy')), (TO_DATE('11-06-2025', 'dd-MM-yyyy')), (TO_DATE('11-07-2025', 'dd-MM-yyyy')),'aprobado', 10,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (52.30, 0.00, 2.62, 54.92, (TO_DATE('11-06-2025', 'dd-MM-yyyy')), (TO_DATE('12-06-2025', 'dd-MM-yyyy')), (TO_DATE('12-07-2025', 'dd-MM-yyyy')),'aprobado', 11,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (43.40, 0.00, 4.34, 47.74, (TO_DATE('12-06-2025', 'dd-MM-yyyy')), (TO_DATE('13-06-2025', 'dd-MM-yyyy')), (TO_DATE('13-07-2025', 'dd-MM-yyyy')),'aprobado', 12,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (166.80, 8.34, 0.00, 158.46, (TO_DATE('13-06-2025', 'dd-MM-yyyy')), (TO_DATE('14-06-2025', 'dd-MM-yyyy')), (TO_DATE('14-07-2025', 'dd-MM-yyyy')),'aprobado', 13,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (62.70, 0.00, 3.14, 65.84, (TO_DATE('14-06-2025', 'dd-MM-yyyy')), (TO_DATE('15-06-2025', 'dd-MM-yyyy')), (TO_DATE('15-07-2025', 'dd-MM-yyyy')),'aprobado', 14,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (82.80, 0.00, 4.14, 86.94, (TO_DATE('15-06-2025', 'dd-MM-yyyy')), (TO_DATE('16-06-2025', 'dd-MM-yyyy')), (TO_DATE('16-07-2025', 'dd-MM-yyyy')),'aprobado', 15,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (19.00, 0.00, 1.90, 20.90, (TO_DATE('16-06-2025', 'dd-MM-yyyy')), (TO_DATE('17-06-2025', 'dd-MM-yyyy')), (TO_DATE('17-07-2025', 'dd-MM-yyyy')),'aprobado', 16,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (808.00, 40.40, 0.00, 767.60, (TO_DATE('17-06-2025', 'dd-MM-yyyy')), (TO_DATE('18-06-2025', 'dd-MM-yyyy')), (TO_DATE('18-07-2025', 'dd-MM-yyyy')),'aprobado', 17,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (198.00, 9.90, 0.00, 188.10, (TO_DATE('18-06-2025', 'dd-MM-yyyy')), (TO_DATE('19-06-2025', 'dd-MM-yyyy')), (TO_DATE('19-07-2025', 'dd-MM-yyyy')),'aprobado', 18,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (5428.00, 542.80, 0.00, 4885.20, (TO_DATE('19-06-2025', 'dd-MM-yyyy')), (TO_DATE('20-06-2025', 'dd-MM-yyyy')), (TO_DATE('20-07-2025', 'dd-MM-yyyy')),'aprobado', 19,'S');
+INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, fechaEntrega, estado, cliente_idCliente, activo) VALUES (1249.00, 124.90, 0.00, 1124.10, (TO_DATE('20-06-2025', 'dd-MM-yyyy')), (TO_DATE('21-06-2025', 'dd-MM-yyyy')), (TO_DATE('21-07-2025', 'dd-MM-yyyy')),'aprobado', 20,'S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Abbi Byllam', 96270688483, 'abyllam0@noaa.gov', 'Oberstrae 110-124', 917166368,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Sansone Rabidge', 57406227427, 'srabidge1@thetimes.co.uk', 'Apartado postal 681', 918811804,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Cleveland Elrick', 26738380394, 'celrick2@wsj.com', '115 E PRIMERO', 910356965,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Thomasin Bromet', 92687624386, 'tbromet3@patch.com', 'VIA VENTI SETTEMBRE, 30', 973167956,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Deni Mogenot', 32965094884, 'dmogenot4@va.gov', '1200 E. WARRENVILLE RD', 912746018,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Miller Stathers', 73775153060 ,'mstathers5@skype.com', 'MAC N9301-041', 900169814,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Pammie Philips', 70858563345, 'pphilips6@foxnews.com', 'Apartado postal 1040', 900146918,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Dusty Wasiel', 41923722609, 'dwasiel7@independent.co.uk', 'VIALE ALTIERO SPINELLI, 30', 913567728,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Artillero Duce', 82264203491, 'gduce8@networkadvertising.org', '128 E PRINCIPAL', 979849941,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Guinna Larkby', 35612968606, 'glarkby9@jalbum.net', '5050 Kingsley Drive', 916195650,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Tandy Ottewill', 43463080154, 'tottewill0@washington.edu', '7785 Corry Center',	936140011,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Darline Marple', 16510451850, 'dmarple1@over-blog.com', '080 Roth Trail', 932658206,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Noby Grombridge', 29358202059, 'ngrombridge2@nasa.gov', '2884 Summit Park', 948546222,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Tobye Culham', 18082986749, 'tculham3@china.com.cn', '37 Sheridan Avenue', 903146061,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Enriqueta McConachie', 25726053761, 'emcconachie4@apple.com', '0 Pennsylvania Center', 961773502,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Dee dee Beautyman', 61706117167, 'ddee5@woothemes.com', '74 Swallow Street', 980575215,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Maribeth Gemeau', 87567547056, 'mgemeau6@google.com.hk', '3 Lawn Drive', 903634103,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Rea Grayland', 80228126701, 'rgrayland7@prlog.org', '1662 Crownhardt Parkway', 943702183,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Corri Greguol', 83571110805, 'cgreguol8@cdc.gov', '3 Londonderry Plaza', 999643034,'S');
+insert into proveedor (razonSocial, ruc, email, direccion, telefono, activo) values ('Nichol Battersby', 34958427125, 'nbattersby9@army.mil', '023 Montana Avenue', 972958310,'S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('12-02-2025', 'dd-MM-yyyy'),84,'estructura',5,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('11-08-2024', 'dd-MM-yyyy'),94,'adaptador',1,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('02-01-2025', 'dd-MM-yyyy'),60,'definici�n',9,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('03-05-2025', 'dd-MM-yyyy'),82,'Cara a cara',2,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('15-02-2025', 'dd-MM-yyyy'),100,'intermedio',4,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('12-04-2025', 'dd-MM-yyyy'),75,'m�vil',8,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('23-01-2025', 'dd-MM-yyyy'),82,'multimedia',7,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('21-10-2024', 'dd-MM-yyyy'),84,'motivador',3,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('19-03-2025', 'dd-MM-yyyy'),96,'multiestatal',6,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('15-02-2025', 'dd-MM-yyyy'),86,'real-time',15,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('01-11-2024', 'dd-MM-yyyy'),63,'local',12,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('11-03-2025', 'dd-MM-yyyy'),86,'paradigm',11,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('15-04-2025', 'dd-MM-yyyy'),90,'Stand-alone',19,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('07-10-2024', 'dd-MM-yyyy'),97,'installation',10,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('30-06-2024', 'dd-MM-yyyy'),86,'algorithm',14,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('14-10-2024', 'dd-MM-yyyy'),82,'adapter',18,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('23-07-2024', 'dd-MM-yyyy'),98,'Cross-platform',17,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('02-12-2024', 'dd-MM-yyyy'),88,'monitoring',13,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('23-07-2024', 'dd-MM-yyyy'),69,'Enterprise-wide',16,'S');
+insert into evaluacion (fechaEvaluacion, calificacion, observacion, proveedor_idProveedor, activo) values (TO_DATE('01-03-2025', 'dd-MM-yyyy'),75,'Interfaz gr�fica',20,'S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO lote (nombreLote,existenciaLote,fechaCaducLote,activo) VALUES ('Lote A1', 10000, TO_DATE('01-01-2026', 'dd-mm-yyyy'),'S');
+INSERT INTO lote (nombreLote,existenciaLote,fechaCaducLote,activo) VALUES ('Lote B1', 5000, TO_DATE('15-12-2025', 'dd-mm-yyyy'),'S');
+INSERT INTO lote (nombreLote,existenciaLote,fechaCaducLote,activo) VALUES ('Lote C1', 8000, TO_DATE('30-06-2026', 'dd-mm-yyyy'),'S');
+INSERT INTO lote (nombreLote,existenciaLote,fechaCaducLote,activo) VALUES ('Lote D1', 20000, TO_DATE('01-07-2026', 'dd-mm-yyyy'),'S');
+INSERT INTO lote (nombreLote,existenciaLote,fechaCaducLote,activo) VALUES ('Lote E1', 15000, TO_DATE('02-07-2026', 'dd-mm-yyyy'),'S');
+INSERT INTO lote (nombreLote,existenciaLote,fechaCaducLote,activo) VALUES ('Lote F1', 9000, TO_DATE('03-07-2026', 'dd-mm-yyyy'),'S');
+INSERT INTO lote (nombreLote,existenciaLote,fechaCaducLote,activo) VALUES ('Lote G1', 12000, TO_DATE('04-07-2026', 'dd-mm-yyyy'),'S');
+INSERT INTO lote (nombreLote,existenciaLote,fechaCaducLote,activo) VALUES ('Lote H1', 13000, TO_DATE('05-07-2026', 'dd-mm-yyyy'),'S');
+INSERT INTO lote (nombreLote,existenciaLote,fechaCaducLote,activo) VALUES ('Lote I1', 11000, TO_DATE('06-07-2026', 'dd-mm-yyyy'),'S');
+INSERT INTO lote (nombreLote,existenciaLote,fechaCaducLote,activo) VALUES ('Lote J1', 14000, TO_DATE('07-07-2026', 'dd-mm-yyyy'),'S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Frutas y Verduras','Frutas y Verduras','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Carnes, Pollos y Pescados','Carnes, Pollos y Pescados','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Desayuno','Desayuno','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('L�cteos y Huevos','L�cteos y Huevos','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Embutidos y Fiambres','Embutidos y Fiambres','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Abarrotes','Abarrotes','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Panader�a y Pasteler�a','Panader�a y Pasteler�a','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Comidas y Rostizados','Comidas y Rostizados','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Congelados','Congelados','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Bebidas','Bebidas','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Cervezas, Vinos y Licores','Cervezas, Vinos y Licores','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Limpieza','Limpieza','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Higiene, Salud y Belleza','Higiene, Salud y Belleza','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Climatizaci�n','Climatizaci�n','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Cocina','Cocina','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Cuidado Personal','Cuidado Personal','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Lavado y Secado','Lavado y Secado','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('L�nea Industrial','L�nea Industrial','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Peque�os Electrodom�sticos','Peque�os Electrodom�sticos','S');
+insert into categoria (nombreCategoria,descripcion,activo) VALUES ('Refrigeraci�n','Refrigeraci�n','S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('E1', 'Almac�n A', 'Zona Norte', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('E2', 'Almac�n A', 'Zona Sur', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('E3', 'Almac�n A', 'Zona Este', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('E4', 'Almac�n A', 'Zona Oeste', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('E5', 'Almac�n A', 'Zona Central', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('F1', 'Almac�n B', 'Zona Norte', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('F2', 'Almac�n B', 'Zona Sur', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('F3', 'Almac�n B', 'Zona Este', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('F4', 'Almac�n B', 'Zona Oeste', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('F5', 'Almac�n B', 'Zona Central', 'S');
+
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('G1', 'Almac�n C', 'Zona Norte', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('G2', 'Almac�n C', 'Zona Sur', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('G3', 'Almac�n C', 'Zona Este', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('G4', 'Almac�n C', 'Zona Oeste', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('G5', 'Almac�n C', 'Zona Central', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('H1', 'Almac�n D', 'Zona Norte', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('H2', 'Almac�n D', 'Zona Sur', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('H3', 'Almac�n D', 'Zona Este', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('H4', 'Almac�n D', 'Zona Oeste', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('H5', 'Almac�n D', 'Zona Central', 'S');
+
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('E6', 'Almac�n A', 'Zona Norte', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('E7', 'Almac�n A', 'Zona Sur', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('E8', 'Almac�n A', 'Zona Este', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('E9', 'Almac�n A', 'Zona Oeste', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('F6', 'Almac�n B', 'Zona Central', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('F7', 'Almac�n B', 'Zona Norte', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('F8', 'Almac�n B', 'Zona Sur', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('F9', 'Almac�n B', 'Zona Este', 'S');
+
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('G6', 'Almac�n C', 'Zona Oeste', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('G7', 'Almac�n C', 'Zona Central', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('G8', 'Almac�n C', 'Zona Norte', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('G9', 'Almac�n C', 'Zona Sur', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('H6', 'Almac�n D', 'Zona Este', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('H7', 'Almac�n D', 'Zona Oeste', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('H8', 'Almac�n D', 'Zona Central', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('H9', 'Almac�n D', 'Zona Norte', 'S');
+
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('I1', 'Almac�n D', 'Zona Este', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('I2', 'Almac�n D', 'Zona Oeste', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('I3', 'Almac�n D', 'Zona Central', 'S');
+INSERT INTO Ubicacion (estanteria, almacen, zona, activo) VALUES ('I4', 'Almac�n D', 'Zona Norte', 'S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (472, 5.39, 'Tomate Italiano Metro', '0.12 KG', 'Tomate Italiano Metro x kg', 1,1,1,'2593070313557','RFID001','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (355, 7.50, 'Br�coli Metro', '0.5 KG', 'Br�coli Metro x kg', 1,1,2,'8589076666002','RFID002','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (484, 8.40, 'Pollo Entero con Menudencia Metro', '2.2 kg', 'Pollo Entero con Menudencia Metro x kg', 2,1,3,'3231607265328','RFID003','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (397, 21.90, 'Carne Molida Especial Nacional', '0.4 kg', 'Carne Molida Especial Nacional x kg', 2,1,4,'1292969028518','RFID004','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (455, 19.90, 'Azúcar Rubia M�xima Bolsa', '5 kg', 'Azúcar Rubia M�xima Bolsa', 3,2,5,'2924938150004','RFID005','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (319, 12.50, 'Pan de Molde Blanco Bimbo XL', '770g', 'Pan de Molde Blanco Bimbo XL', 3,2,6,'1675314612178','RFID006','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (342, 22.90, 'Sixpack Leche Reconstituida Gloria Light Lata', '390g', 'Sixpack Leche Reconstituida Gloria Light Lata', 4,2,7,'1716706712732','RFID007','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (500, 23.30, 'Huevos Cl�sicos Pardos La Calera', '30 unid', 'Huevos Cl�sicos Pardos La Calera', 4,2,8,'2906740547746','RFID008','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (324, 12.90, 'Pack Jam�n Pizzero + Queso Edam Braedt', '370g', 'Pack Jam�n Pizzero + Queso Edam Braedt', 5,3,9,'2012345678901','RFID009','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (404, 14.90, 'Chorizo Parrillero Otto Kunz', '400g', 'Chorizo Parrillero Otto Kunz', 5,3,10,'2023456789012','RFID010','S');
+
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (481, 18.90, 'Twopack Aceite Vegetal Primor Premium', '900ml', 'Twopack Aceite Vegetal Primor Premium', 6,3,11,'2034567890123','RFID011','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (444, 25.90, 'Arroz Extra Coste�o', '5kg', 'Arroz Extra Coste�o', 6,3,12,'2045678901234','RFID012','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (469, 1.52, 'Pan Baguette Cl�sico', '1 unid', 'Pan Baguette Cl�sico', 7,4,13,'2056789012345','RFID013','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (311, 54.90, 'Torta Helada de Fresa', '20 Porc', 'Torta Helada de Fresa', 7,4,14,'2067890123456','RFID014','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (415, 22.90, 'Pollo Rostizado Sin Papas', '1 unid', 'Pollo Rostizado Sin Papas', 8,4,15,'2078901234567','RFID015','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (457, 8.50, 'Tamal de Chincha de Pollo', '1 unid', 'Tamal de Chincha de Pollo', 8,4,16,'2089012345678','RFID016','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (323, 15.50, 'Fresa Entera Congelada El Frutero', '1kg', 'Fresa Entera Congelada El Frutero', 9,5,17,'2090123456789','RFID017','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (357, 8.90, 'Helado de Crema Peziduri Tricolor', '900ml', 'Helado de Crema Peziduri Tricolor', 9,5,18,'2101234567890','RFID018','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (371, 6.90, 'Agua Sin Gas Mineral San Mateo Bid�n', '7L', 'Agua Sin Gas Mineral San Mateo Bid�n', 10,5,19,'2112345678901','RFID019','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (465, 21.70, 'Twopack Gaseosa Coca Cola Sabor Original Botella', '3L c/u', 'Twopack Gaseosa Coca Cola Sabor Original Botella', 10,5,20,'2123456789012','RFID020','S');
+
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (313, 129.90, 'Pack x3 Twelvepack Cerveza Pilsen Callao Lata', '355ml c/u', 'Pack x3 Twelvepack Cerveza Pilsen Callao Lata', 11,6,21,'2134567890123','RFID021','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (466, 36.90, 'Pack Tabernero Pasaporte Rosso: Vino Ros�', '2 unid', 'Pack Tabernero Pasaporte Rosso: Vino Ros�', 11,6,22,'2145678901234','RFID022','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (397, 24.50, 'Papel Higi�nico Doble Hoja Suave Resistemax', '40un', 'Papel Higi�nico Doble Hoja Suave Resistemax', 12,6,23,'2156789012345','RFID023','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (498, 20.90, 'Lavavajillas L�quido Home Care Lim�n', '4L', 'Lavavajillas L�quido Home Care Lim�n', 12,6,24,'2167890123456','RFID024','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (415, 16.90, 'Tripack Pasta Dental Colgate Triple Accion', '100ml c/u', 'Tripack Pasta Dental Colgate Triple Accion', 13,7,25,'2178901234567','RFID025','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (378, 19.90, 'Jab�n Antibacterial Avena Barra 110 g Pack', '6 unid', 'Jab�n Antibacterial Avena Barra 110 g Pack', 13,7,26,'2189012345678','RFID026','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (364, 24.90, 'Ventilador Box 9" Nex 30W', '1 unid', 'Ventilador Box 9" Nex 30W', 14,7,27,'2190123456789','RFID027','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (319, 129.00, 'Estufa Convecci�n El�ctrica Nex Blanco', '1 unid', 'Estufa Convecci�n El�ctrica Nex Blanco', 14,7,28,'2201234567890','RFID028','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (409, 679.00, 'Cocina de Piso a Gas 60cm Silver Mabe CMP6014AG1', '1 unid', 'Cocina de Piso a Gas 60cm Silver Mabe CMP6014AG1', 15,8,29,'2212345678901','RFID029','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (355, 579.00, 'Cocina a Gas 24" Midea 4 Quemadores Negra', '1 unid', 'Cocina a Gas 24" Midea 4 Quemadores Negra', 15,8,30,'2223456789012','RFID030','S');
+
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (485, 99.00, 'Secadora de Cabello Siegen Profesional SG-3049C01', '1 unid', 'Secadora de Cabello Siegen Profesional SG-3049C01', 16,8,31,'2234567890123','RFID031','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (402, 249.00, 'Alisador de Cabello Siegen Pro-Ceramic SG-4755', '1 unid', 'Alisador de Cabello Siegen Pro-Ceramic SG-4755', 16,8,32,'2245678901234','RFID032','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (445, 699.00, 'Lavadora Hisense Carga Superior 10KG WT3J1023UT', '1 unid', 'Lavadora Hisense Carga Superior 10KG WT3J1023UT', 17,9,33,'2256789012345','RFID033','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (411, 1149.00, 'Lavadora Carga Superior LG WT13DPBK 13kg SM Gris', '1 unid', 'Lavadora Carga Superior LG WT13DPBK 13kg SM Gris', 17,9,34,'2267890123456','RFID034','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (376, 4279, 'Vitrina refrigerada vidrio curvo VRDH-1500AI', '1 unid', 'Vitrina refrigerada vidrio curvo VRDH-1500AI', 18,9,35,'2278901234567','RFID035','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (452, 3999, 'Vitrina refrigerada de sobremesa de 120 litros', '1 unid', 'Vitrina refrigerada de sobremesa de 120 litros', 18,9,36,'2289012345678','RFID036','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (350, 229.00, 'Oster Licuadora Osterizer 250-22 600W', '1 unid', 'Oster Licuadora Osterizer 250-22 600W', 19,10,37,'2290123456789','RFID037','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (305, 95.00, 'Oster Olla Arrocera Multiusos 700W 1.8 lt', '1 unid', 'Oster Olla Arrocera Multiusos 700W 1.8 lt', 19,10,38,'2301234567890','RFID038','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (373, 1249.00, 'Refrigeradora Top Freezer LG GT24BPP 241L DC', '1 unid', 'Refrigeradora Top Freezer LG GT24BPP 241L DC', 20,10,39,'2312345678901','RFID039','S');
+insert into producto (existencia,precioUnit,nombreProd,unidad,descripcion,categoria_idCategoria,Lote_idLote,Ubicacion_idUbicacion,codigoBarra,rfid,activo) values (374, 1699.00, 'Refrigeradora Samsung TMF 341L RT35DG5720S9/PE', '1 unid', 'Refrigeradora Samsung TMF 341L RT35DG5720S9/PE', 20,10,40,'2323456789012','RFID040','S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (8,27,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (1,21,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (18,36,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (7,7,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (18,2,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (10,38,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (5,18,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (18,15,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (16,37,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (3,33,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (1,31,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (13,4,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (4,38,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (4,10,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (11,40,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (18,37,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (17,36,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (8,24,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (4,1,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (9,30,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (9,34,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (18,12,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (7,30,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (20,21,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (6,12,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (10,21,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (19,32,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (12,21,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (11,14,'S');
+insert into detalleProveedor (proveedor_idProveedor,producto_idProducto,activo) values (6,37,'S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (2, 5.39, 1, 1, 10.78, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (1, 8.40, 3, 1, 8.4, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (3, 19.90, 5, 2, 59.7, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (5, 7.50, 2, 3, 37.5, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (4, 22.90, 7, 3, 91.6, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (2, 14.90, 10, 4, 29.8, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (1, 25.90, 12, 5, 25.9, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (3, 18.90, 11, 5, 56.7, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (2, 12.90, 9, 6, 25.8, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (6, 21.90, 4, 7, 131.4, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (1, 54.90, 14, 7, 54.9, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (2, 12.50, 6, 8, 25, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (1, 22.90, 15, 9, 22.9, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (2, 8.50, 16, 9, 17, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (3, 15.50, 17, 10, 46.5, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (2, 8.90, 18, 11, 17.8, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (5, 6.90, 19, 11, 34.5, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (2, 21.70, 20, 12, 43.4, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (1, 36.90, 22, 13, 36.9, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (1, 129.90, 21, 13, 129.9, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (3, 20.90, 24, 14, 62.7, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (2, 24.50, 23, 15, 49, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (2, 16.90, 25, 15, 33.8, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (1, 19.90, 26, 16, 19.9, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (1, 129.00, 28, 17, 129, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (1, 679.00, 29, 17, 679, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (2, 99.00, 31, 18, 198, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (1, 1249.00, 33, 19, 1249, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (1, 4279.00, 35, 19, 4279, 'S');
+INSERT INTO detalleOrden (cantidadDtl, precioUnit, Producto_idProducto, Orden_idOrden,subtotalUnit,activo) VALUES (1, 1249.00, 39, 20, 1249, 'S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('ENTRADA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 20,'reposicion', 1, 1,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('SALIDA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 10,'reposicion', 2, 2,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('ENTRADA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 15,'reposicion', 3, 3,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('SALIDA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 5,'reposicion', 4, 4,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('ENTRADA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 12,'reposicion', 5, 5,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('ENTRADA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 18,'reposicion', 6, 6,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('SALIDA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 7,'reposicion', 7, 7,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('ENTRADA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 10,'reposicion', 8, 8,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('SALIDA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 6,'reposicion', 9, 9,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('ENTRADA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 9,'reposicion', 10, 10,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('ENTRADA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 18,'reposicion', 11, 11,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('SALIDA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 6,'reposicion', 12, 12,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('ENTRADA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 12,'reposicion', 13, 13,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('SALIDA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 5,'reposicion', 14, 14,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('ENTRADA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 10,'reposicion', 15, 15,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('SALIDA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 9,'reposicion', 16, 16,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('ENTRADA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 14,'reposicion', 17, 17,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('SALIDA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 4,'reposicion', 18, 18,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('ENTRADA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 20,'reposicion', 19, 19,'S');
+INSERT INTO MOVIMIENTO (tipoMov,fechaMov,cantidadMov,motivo,Usuario_idUsuario,Producto_idProducto,activo) VALUES ('SALIDA', TO_DATE(SYSDATE, 'dd-MM-yyyy'), 7,'reposicion', 20, 20,'S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('boleta',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'B001-000001',1,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('boleta',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'B001-000002',2,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('boleta',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'B001-000003',3,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('boleta',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'B001-000004',4,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('boleta',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'B001-000005',5,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('boleta',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'B001-000006',6,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('boleta',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'B001-000007',7,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('boleta',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'B001-000008',8,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('boleta',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'B001-000009',9,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('boleta',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'B001-000010',10,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('factura',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'F001-000001',11,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('factura',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'F001-000002',12,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('factura',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'F001-000003',13,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('factura',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'F001-000004',14,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('factura',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'F001-000005',15,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('factura',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'F001-000006',16,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('factura',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'F001-000007',17,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('factura',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'F001-000008',18,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('factura',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'F001-000009',19,'S');
+insert into Comprobante (tipoComprob,fechaEmision,comprobFiscal,Orden_idOrden,activo) values ('factura',TO_DATE(SYSDATE, 'dd-MM-yyyy'),'F001-000010',20,'S');
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--CONSULTAS-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW productos_activos AS
+SELECT 
+    p.idProducto,
+    p.nombreProd,
+    p.descripcion,
+    p.existencia,
+    p.precioUnit,
+    p.codigoBarra,
+    p.rfid,
+    p.unidad,
+    c.nombreCategoria,
+    u.estanteria
+FROM 
+    producto p
+    JOIN categoria c ON p.categoria_idCategoria = c.idCategoria
+    JOIN ubicacion u ON p.ubicacion_idUbicacion = u.idUbicacion
+WHERE 
+    p.activo = 'S';
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW productos_por_proveedor AS
+SELECT 
+    dp.proveedor_idProveedor,
+    pr.razonSocial AS nombreProveedor,
+    p.idProducto,
+    p.nombreProd
+FROM 
+    detalleProveedor dp
+    JOIN proveedor pr ON dp.proveedor_idProveedor = pr.idProveedor
+    JOIN producto p ON dp.producto_idProducto = p.idProducto
+WHERE 
+    dp.activo = 'S';
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW detalle_por_orden AS
+SELECT 
+    do.Orden_idOrden,
+    o.fechaSolicitud,
+    p.nombreProd,
+    do.cantidadDtl,
+    do.precioUnit,
+    do.subtotalUnit
+FROM 
+    detalleOrden do
+    JOIN producto p ON do.Producto_idProducto = p.idProducto
+    JOIN orden o ON do.Orden_idOrden = o.idOrden
+WHERE 
+    do.activo = 'S';
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW movimientos_de_productos AS
+SELECT 
+    m.Producto_idProducto,
+    p.nombreProd,
+    m.tipoMov,
+    m.fechaMov,
+    m.cantidadMov,
+    m.motivo,
+    u.nombreUsuario
+FROM 
+    movimiento m
+    JOIN producto p ON m.Producto_idProducto = p.idProducto
+    JOIN usuario u ON m.Usuario_idUsuario = u.idUsuario
+WHERE 
+    m.activo = 'S';
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW comprobantes_emitidos AS
+SELECT 
+    c.idComprobante,
+    c.tipoComprob,
+    c.comprobFiscal,
+    c.fechaEmision,
+    c.Orden_idOrden,
+    o.fechaSolicitud,
+    o.fechaAprob
+FROM 
+    comprobante c
+    JOIN orden o ON c.Orden_idOrden = o.idOrden
+WHERE 
+    c.activo = 'S';
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW stock_total AS
+SELECT 
+    p.idProducto,
+    p.nombreProd,
+    p.existencia,
+    p.precioUnit,
+    (p.existencia * p.precioUnit) AS stock_valorizado
+FROM 
+    producto p
+WHERE 
+    p.activo = 'S';
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW productos_sin_movimiento AS
+SELECT 
+    p.idProducto,
+    p.nombreProd
+FROM 
+    producto p
+WHERE 
+    p.idProducto NOT IN (
+        SELECT DISTINCT Producto_idProducto FROM movimiento WHERE activo = 'S'
+    )
+AND p.activo = 'S';
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW productos_mas_vendidos AS
+SELECT 
+    p.idProducto,
+    p.nombreProd,
+    SUM(do.cantidadDtl) AS total_ordenado
+FROM 
+    detalleOrden do
+    JOIN producto p ON do.Producto_idProducto = p.idProducto
+WHERE 
+    do.activo = 'S'
+GROUP BY 
+    p.idProducto, p.nombreProd
+ORDER BY 
+    total_ordenado DESC;
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW ventas_por_dia AS
+SELECT 
+    o.fechaAprob,
+    SUM(do.subtotalUnit) AS total_ventas
+FROM 
+    orden o
+    JOIN detalleOrden do ON o.idOrden = do.Orden_idOrden
+WHERE 
+    do.activo = 'S'
+GROUP BY 
+    o.fechaAprob
+ORDER BY 
+    o.fechaAprob;
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW resumen_ordenes AS
+SELECT 
+    o.idOrden,
+    c.tipoComprob,
+    c.comprobFiscal,
+    SUM(do.subtotalUnit) AS total_orden
+FROM 
+    orden o
+    JOIN comprobante c ON o.idOrden = c.Orden_idOrden
+    JOIN detalleOrden do ON o.idOrden = do.Orden_idOrden
+WHERE 
+    do.activo = 'S'
+GROUP BY 
+    o.idOrden, c.tipoComprob, c.comprobFiscal;
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+--PROCEDIMIENTOS--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE sp_insertar_cliente(
+    p_razonSocial   IN Cliente.razonSocial%TYPE,
+    p_direccion     IN Cliente.direccion%TYPE,
+    p_email         IN Cliente.email%TYPE,
+    p_telefono      IN Cliente.telefono%TYPE,
+    p_celular       IN Cliente.celular%TYPE
+)
+AS
+BEGIN
+    INSERT INTO Cliente (razonSocial, direccion, email, telefono, celular, activo)
+    VALUES (p_razonSocial, p_direccion, p_email, p_telefono, p_celular, 'S');
+        commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al aprobar orden: ' || SQLERRM); 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE sp_insertar_producto(
+    p_precioUnit    IN Producto.precioUnit%TYPE,
+    p_nombreProd    IN Producto.nombreProd%TYPE,
+    p_existencia    IN Producto.existencia%TYPE,
+    p_unidad        IN Producto.unidad%TYPE,
+    p_descripcion   IN Producto.descripcion%TYPE,
+    p_codigoBarra   IN Producto.codigoBarra%TYPE,
+    p_rfid          IN Producto.rfid%TYPE,
+    p_categoria     IN Producto.Categoria_idCategoria%TYPE,
+    p_lote          IN Producto.Lote_idLote%TYPE,
+    p_ubicacion     IN Producto.Ubicacion_idUbicacion%TYPE
+)
+AS
+BEGIN
+    INSERT INTO Producto (
+        precioUnit, nombreProd, existencia, unidad, descripcion,
+        codigoBarra, rfid, Categoria_idCategoria, Lote_idLote,
+        Ubicacion_idUbicacion, activo
+    )
+    VALUES (
+        p_precioUnit, p_nombreProd, p_existencia, p_unidad, p_descripcion,
+        p_codigoBarra, p_rfid, p_categoria, p_lote,
+        p_ubicacion, 'S'
+    );
+        commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al aprobar orden: ' || SQLERRM); 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE sp_actualizar_precio_producto(
+    p_idProducto IN Producto.idProducto%TYPE,
+    p_nuevoPrecio IN Producto.precioUnit%TYPE
+)
+AS
+BEGIN
+    UPDATE Producto
+    SET precioUnit = p_nuevoPrecio
+    WHERE idProducto = p_idProducto;
+        commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al aprobar orden: ' || SQLERRM); 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE sp_insertar_orden(
+    p_cliente_idCliente IN orden.cliente_idCliente%TYPE
+) AS
+    p_fechaSolicitud DATE;
+    v_existe_cliente NUMBER;
+    v_existe_orden NUMBER;
+BEGIN
+    -- Verificar si el cliente existe
+    SELECT COUNT(*) INTO v_existe_cliente
+    FROM cliente
+    WHERE idCliente = p_cliente_idCliente;
+
+    IF v_existe_cliente = 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'El cliente no existe');
+    END IF;
+
+    -- Verificar si la orden ya existe para el cliente en la misma fecha
+    SELECT COUNT(*) INTO v_existe_orden
+    FROM orden
+    WHERE cliente_idCliente = p_cliente_idCliente
+    AND TRUNC(fechaSolicitud) = TRUNC(p_fechaSolicitud);
+
+    IF v_existe_orden > 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'La orden ya existe para el cliente en la misma fecha');
+    END IF;
+
+    -- Insertar la orden
+    p_fechaSolicitud := TO_DATE(sysdate,'dd-mm-yyyy');
+    INSERT INTO orden (subtotalOrden, descuento, impuesto, importeTotal, fechaSolicitud, fechaAprob, cliente_idCliente, estado, activo, fechaEntrega)
+    VALUES (NULL, NULL, NULL, NULL, p_fechaSolicitud, NULL, p_cliente_idCliente, 'Solicitado', 'S', NULL);
+    COMMIT;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al insertar en Orden: ' || SQLERRM);
+END sp_insertar_orden;
+/
+set serveroutput on
+BEGIN
+    sp_insertar_orden(1);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE insertar_detalle_orden(
+    p_orden_idOrden IN detalleOrden.orden_idOrden%TYPE,
+    p_producto_idProducto IN detalleOrden.producto_idProducto%TYPE,
+    p_cantidadDtl IN NUMBER
+) AS
+    v_existe_orden NUMBER;
+    v_existe_producto NUMBER;
+    v_precio_unit NUMBER;
+    v_subtotal_unit NUMBER;
+    v_anteriorStock NUMBER;
+    v_nuevoStock NUMBER;
+BEGIN
+    -- Verificar si la orden existe
+    SELECT COUNT(*) INTO v_existe_orden
+    FROM orden
+    WHERE idOrden = p_orden_idOrden;
+
+    IF v_existe_orden = 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'La orden no existe');
+    END IF;
+
+    -- Verificar si el producto existe
+    SELECT COUNT(*) INTO v_existe_producto
+    FROM producto
+    WHERE idProducto = p_producto_idProducto;
+
+    IF v_existe_producto = 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'El producto no existe');
+    END IF;
+
+    -- validar existencia
+    select existencia into v_anteriorStock
+    from producto
+    where idProducto = p_producto_idProducto;
+
+    if v_anteriorStock < p_cantidadDtl then
+        RAISE_APPLICATION_ERROR(-20003, 'El producto tiene insuficiente stock');
+    end if;
+
+    -- Obtener el precio unitario del producto
+    SELECT precioUnit INTO v_precio_unit
+    FROM producto
+    WHERE idProducto = p_producto_idProducto;
+
+    -- Calcular el precio de compra
+    v_subtotal_unit := p_cantidadDtl * v_precio_unit;
+
+    -- Calcular nuevo stock
+    v_nuevoStock := v_anteriorStock - p_cantidadDtl;
+
+    -- Insertar el detalle de la orden
+    INSERT INTO detalleOrden (orden_idOrden, producto_idProducto, cantidadDtl, precioUnit, subtotalUnit, activo)
+    VALUES (p_orden_idOrden, p_producto_idProducto, p_cantidadDtl, v_precio_unit, v_subtotal_unit, 'S');
+    update producto set existencia = v_nuevoStock where idProducto = p_producto_idProducto;
+    COMMIT;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al insertar en detalleOrden: ' || SQLERRM);
+END insertar_detalle_orden;
+/
+
+select * from producto where idProducto = 31;
+set serveroutput on
+BEGIN
+    insertar_detalle_orden(21, 31, 2);
+END;
+/
+select * from detalleOrden where orden_idOrden = 21;
+
+select * from producto where idProducto = 2;
+set serveroutput on
+BEGIN
+    insertar_detalle_orden(21, 2, 4);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE calcular_subtotal(
+    p_orden_idOrden IN detalleOrden.orden_idOrden%TYPE,
+    p_subtotal OUT NUMBER
+) AS
+BEGIN
+    SELECT NVL(SUM(subtotalUnit), 0) INTO p_subtotal
+    FROM detalleOrden
+    WHERE orden_idOrden = p_orden_idOrden;
+    commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al calcular subtotal: ' || SQLERRM);
+END calcular_subtotal;
+/
+set serveroutput on
+DECLARE
+    v_subtotal NUMBER(10, 2);
+BEGIN
+    calcular_subtotal(21, v_subtotal);
+    DBMS_OUTPUT.PUT_LINE('Subtotal: ' || v_subtotal);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE calcular_dcto_impto(
+    p_subtotal IN NUMBER,
+    p_dcto OUT NUMBER,
+    p_impto OUT NUMBER
+) AS
+BEGIN
+    -- Calcular descuento
+    IF p_subtotal >= 1000 THEN
+        p_dcto := p_subtotal * 0.10;
+    ELSIF p_subtotal > 100 THEN
+        p_dcto := p_subtotal * 0.05;
+    ELSE
+        p_dcto := 0.00;
+    END IF;
+
+    -- Calcular impuesto
+    IF p_subtotal < 50 THEN
+        p_impto := p_subtotal * 0.10;
+    ELSIF p_subtotal < 100 THEN
+        p_impto := p_subtotal * 0.05;
+    ELSE
+        p_impto := 0.00;
+    END IF;
+    commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al calcular descuento o impuesto: ' || SQLERRM); 
+END calcular_dcto_impto;
+/
+set serveroutput on
+DECLARE
+    v_subtotal NUMBER(10, 2);
+    v_dcto NUMBER(10, 2);
+    v_impto NUMBER(10, 2);
+BEGIN
+    calcular_subtotal(21, v_subtotal);
+    calcular_dcto_impto(v_subtotal, v_dcto, v_impto);
+    DBMS_OUTPUT.PUT_LINE('Subtotal: ' || v_subtotal);
+    DBMS_OUTPUT.PUT_LINE('Descuento: ' || v_dcto);
+    DBMS_OUTPUT.PUT_LINE('Impuesto: ' || v_impto);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE aprob_orden(
+    p_orden_idOrden IN orden.idOrden%TYPE
+) AS
+    v_subtotalOrden NUMBER(10, 2);
+    v_dcto NUMBER(10, 2);
+    v_impto NUMBER(10, 2);
+    v_fechaAprob DATE;
+    v_fechaEntrega DATE;
+    v_existe_orden NUMBER;
+    v_fecha_aprobada NUMBER;
+BEGIN
+    -- Verificar si la orden existe
+    SELECT COUNT(*) INTO v_existe_orden
+    FROM orden
+    WHERE idOrden = p_orden_idOrden;
+
+    IF v_existe_orden = 0 THEN
+        RAISE_APPLICATION_ERROR(-20001, 'La orden no existe');
+    END IF;
+
+    -- Verificar si la orden ya ha sido aprobada
+    SELECT COUNT(*) INTO v_fecha_aprobada
+    FROM orden
+    WHERE idOrden = p_orden_idOrden
+    AND fechaAprob IS NOT NULL;
+
+    IF v_fecha_aprobada > 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'La orden ya ha sido aprobada');
+    END IF;
+
+    -- Calcular subtotal, descuento e impuesto
+    calcular_subtotal(p_orden_idOrden, v_subtotalOrden);
+    calcular_dcto_impto(v_subtotalOrden, v_dcto, v_impto);
+
+    -- Aprobar la orden
+    v_fechaAprob := TO_DATE(sysdate,'dd-mm-yyyy');
+    v_fechaEntrega := TO_DATE(sysdate,'dd-mm-yyyy');
+    UPDATE orden
+    SET subtotalOrden = v_subtotalOrden,
+        descuento = v_dcto,
+        impuesto = v_impto,
+        fechaAprob = v_fechaAprob,
+        fechaEntrega = v_fechaEntrega,
+        estado = 'Aprobado',
+        importeTotal = v_subtotalOrden - v_dcto + v_impto
+    WHERE idOrden = p_orden_idOrden;
+    commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al aprobar orden: ' || SQLERRM); 
+END aprob_orden;
+/
+select * from orden where idOrden = 21;
+set serveroutput on
+BEGIN
+    aprob_orden(21);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE sp_listar_productos_por_categoria(
+    p_idCategoria IN Categoria.idCategoria%TYPE
+)
+AS
+BEGIN
+    FOR r IN (
+        SELECT nombreProd, precioUnit
+        FROM Producto
+        WHERE Categoria_idCategoria = p_idCategoria
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('Producto: ' || r.nombreProd || ' - Precio: ' || r.precioUnit);
+    END LOOP;
+        commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al aprobar orden: ' || SQLERRM); 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE sp_insertar_usuario(
+    p_nombreUsuario IN Usuario.nombreUsuario%TYPE,
+    p_email         IN Usuario.email%TYPE,
+    p_contrasena    IN Usuario.contrasena%TYPE,
+    p_idRol         IN Usuario.Rol_idRol%TYPE
+)
+AS
+BEGIN
+    INSERT INTO Usuario (nombreUsuario, email, contrasena, Rol_idRol, activo)
+    VALUES (p_nombreUsuario, p_email, p_contrasena, p_idRol, 'S');
+        commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al aprobar orden: ' || SQLERRM); 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE sp_insertar_evaluacion_proveedor(
+    p_fecha         IN Evaluacion.fechaEvaluacion%TYPE,
+    p_calificacion  IN Evaluacion.calificacion%TYPE,
+    p_observacion   IN Evaluacion.observacion%TYPE,
+    p_idProveedor   IN Evaluacion.Proveedor_idProveedor%TYPE
+)
+AS
+BEGIN
+    INSERT INTO Evaluacion (fechaEvaluacion, calificacion, observacion, Proveedor_idProveedor, activo)
+    VALUES (p_fecha, p_calificacion, p_observacion, p_idProveedor, 'S');
+        commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al aprobar orden: ' || SQLERRM); 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE sp_listar_ordenes_por_cliente(
+    p_idCliente IN Cliente.idCliente%TYPE
+)
+AS
+BEGIN
+    FOR r IN (
+        SELECT idOrden, fechaSolicitud, importeTotal
+        FROM Orden
+        WHERE Cliente_idCliente = p_idCliente
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('Orden: ' || r.idOrden || ', Fecha: ' || TO_CHAR(r.fechaSolicitud, 'dd-mm-yyyy') || ', Total: ' || r.importeTotal);
+    END LOOP;
+        commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al aprobar orden: ' || SQLERRM); 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE sp_registrar_movimiento(
+    p_tipoMov      IN Movimiento.tipoMov%TYPE,
+    p_fechaMov     IN Movimiento.fechaMov%TYPE,
+    p_cantidadMov  IN Movimiento.cantidadMov%TYPE,
+    p_motivo       IN Movimiento.motivo%TYPE,
+    p_idUsuario    IN Movimiento.Usuario_idUsuario%TYPE,
+    p_idProducto   IN Movimiento.Producto_idProducto%TYPE,
+)
+AS
+BEGIN
+    INSERT INTO Movimiento (tipoMov, fechaMov, cantidadMov, motivo, Usuario_idUsuario, Producto_idProducto, activo)
+    VALUES (p_tipoMov, p_fechaMov, p_cantidadMov, p_motivo, p_idUsuario, p_idProducto, 'S');
+        commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al aprobar orden: ' || SQLERRM); 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE sp_detalle_producto(
+    p_idProducto IN Producto.idProducto%TYPE
+)
+AS
+    v_nombre     Producto.nombreProd%TYPE;
+    v_precio     Producto.precioUnit%TYPE;
+    v_existencia Producto.existencia%TYPE;
+BEGIN
+    SELECT nombreProd, precioUnit, existencia
+    INTO v_nombre, v_precio, v_existencia
+    FROM Producto
+    WHERE idProducto = p_idProducto;
+
+    DBMS_OUTPUT.PUT_LINE('Producto: ' || v_nombre);
+    DBMS_OUTPUT.PUT_LINE('Precio: ' || v_precio);
+    DBMS_OUTPUT.PUT_LINE('Existencia: ' || v_existencia);
+    commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error al aprobar orden: ' || SQLERRM); 
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE SP_ObtenerInfoProducto (
+    p_idProducto IN Producto.idProducto%TYPE,
+    o_nombreProd OUT Producto.nombreProd%TYPE,
+    o_precioUnit OUT Producto.precioUnit%TYPE,
+    o_nombreCat OUT Categoria.nombreCategoria%TYPE,
+    o_stockTotal OUT Producto.existencia%TYPE
+)
+AS
+BEGIN
+    SELECT
+        p.nombreProd,
+        p.precioUnit,
+        c.nombreCategoria,
+        p.existencia 
+    INTO
+        o_nombreProd,
+        o_precioUnit,
+        o_nombreCat,
+        o_stockTotal
+    FROM
+        Producto p
+    JOIN
+        Categoria c ON p.Categoria_idCategoria = c.idCategoria
+    WHERE
+        p.idProducto = p_idProducto;
+
+    IF o_nombreProd IS NULL THEN
+        DBMS_OUTPUT.PUT_LINE('Producto con ID ' || p_idProducto || ' no encontrado.');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error en SP_ObtenerInfoProducto: Producto con ID ' || p_idProducto || ' no encontrado.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error en SP_ObtenerInfoProducto: ' || SQLERRM);
+END;
+/
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_nombreProd    Producto.nombreProd%TYPE;
+    v_precioUnit    Producto.precioUnit%TYPE;
+    v_nombreCat     Categoria.nombreCategoria%TYPE;
+    v_stockTotal    Producto.existencia%TYPE;
+
+    v_id_producto_a_consultar Producto.idProducto%TYPE := 2; 
+BEGIN
+    SP_ObtenerInfoProducto(
+        p_idProducto => v_id_producto_a_consultar,
+        o_nombreProd => v_nombreProd,
+        o_precioUnit => v_precioUnit,
+        o_nombreCat  => v_nombreCat,
+        o_stockTotal => v_stockTotal
+    );
+
+    DBMS_OUTPUT.PUT_LINE('--- Información del Producto ---');
+    DBMS_OUTPUT.PUT_LINE('ID Consultado: ' || v_id_producto_a_consultar);
+    DBMS_OUTPUT.PUT_LINE('Nombre del Producto: ' || v_nombreProd);
+    DBMS_OUTPUT.PUT_LINE('Precio Unitario: ' || v_precioUnit);
+    DBMS_OUTPUT.PUT_LINE('Categoría: ' || v_nombreCat);
+    DBMS_OUTPUT.PUT_LINE('Stock Total: ' || v_stockTotal);
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error inesperado durante la prueba: ' || SQLERRM);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE SP_InsertarNuevaCategoria (
+    p_nombreCat IN Categoria.nombreCategoria%TYPE,
+    p_descripcionCat IN Categoria.descripcion%TYPE
+)
+AS
+BEGIN
+    INSERT INTO Categoria (nombreCategoria, descripcion)
+    VALUES (p_nombreCat, p_descripcionCat);
+    
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Categoría "' || p_nombreCat || '" insertada con éxito.');
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error en SP_InsertarNuevaCategoria: ' || SQLERRM);
+END;
+/
+set serveroutput on;
+BEGIN
+  SP_InsertarNuevaCategoria('Bebidas Naturales', 'Jugos y aguas sin gas');
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE sp_insertar_proveedor(
+    p_razonSocial IN Proveedor.razonSocial%TYPE,
+    p_ruc         IN Proveedor.ruc%TYPE,
+    p_email       IN Proveedor.email%TYPE,
+    p_direccion   IN Proveedor.direccion%TYPE,
+    p_telefono    IN Proveedor.telefono%TYPE,
+    p_activo      IN Proveedor.activo%TYPE DEFAULT 'S'
+)
+AS
+BEGIN
+    INSERT INTO Proveedor (razonSocial, ruc, email, direccion, telefono, activo)
+    VALUES (p_razonSocial, p_ruc, p_email, p_direccion, p_telefono, p_activo);
+    
+    COMMIT;
+    DBMS_OUTPUT.PUT_LINE('Proveedor "' || p_razonSocial || '" insertado con éxito.');
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error en sp_insertar_proveedor: ' || SQLERRM);
+END;
+/
+SET SERVEROUTPUT ON;
+
+BEGIN
+    sp_insertar_proveedor(
+        p_razonSocial => 'Distribuidora ABC S.A.',
+        p_ruc         => 20123456789,
+        p_email       => 'contacto@abc.com',
+        p_direccion   => 'Av. Los Libertadores 123, Miraflores',
+        p_telefono    => 987654321,
+        p_activo      => 'S'
+    );
+    
+    sp_insertar_proveedor(
+        p_razonSocial => 'Suministros Globales Ltda.',
+        p_ruc         => 20987654321,
+        p_email       => 'info@globales.net',
+        p_direccion   => 'Calle Las Begonias 456, San Isidro',
+        p_telefono    => 112233445
+    );
+
+    DBMS_OUTPUT.PUT_LINE('Prueba de inserción de proveedores completada.');
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error durante la prueba de inserción de proveedores: ' || SQLERRM);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PACKAGE types
+AS
+    TYPE ref_cursor IS REF CURSOR;
+END;
+/
+CREATE OR REPLACE PROCEDURE SP_ObtenerOrdenesPorFecha (
+    p_fechaInicio IN Orden.fechaSolicitud%TYPE,
+    p_fechaFin    IN Orden.fechaSolicitud%TYPE,
+    o_ordenes_cursor OUT types.ref_cursor
+)
+AS
+BEGIN
+    OPEN o_ordenes_cursor FOR
+        SELECT
+            o.idOrden,
+            o.fechaSolicitud,
+            o.importeTotal,
+            c.razonSocial
+        FROM
+            Orden o
+        JOIN
+            Cliente c ON o.Cliente_idCliente = c.idCliente
+        WHERE
+            o.fechaSolicitud BETWEEN p_fechaInicio AND p_fechaFin
+        ORDER BY
+            o.fechaSolicitud ASC;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error en SP_ObtenerOrdenesPorFecha: ' || SQLERRM);
+END;
+/
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_ordenes_cursor types.ref_cursor;
+    
+    v_idOrden       Orden.idOrden%TYPE;
+    v_fechaSolicitud Orden.fechaSolicitud%TYPE;
+    v_importeTotal  Orden.importeTotal%TYPE;
+    v_razonSocial   Cliente.razonSocial%TYPE;
+BEGIN
+    SP_ObtenerOrdenesPorFecha(
+        p_fechaInicio => TO_DATE('2025-06-11', 'YYYY-MM-DD'),
+        p_fechaFin    => TO_DATE('2025-06-20', 'YYYY-MM-DD'),
+        o_ordenes_cursor => v_ordenes_cursor
+    );
+
+    DBMS_OUTPUT.PUT_LINE('--- Reporte de Órdenes por Fecha ---');
+    DBMS_OUTPUT.PUT_LINE('ID_Orden | Fecha Solicitud | Importe Total | Razón Social Cliente');
+    DBMS_OUTPUT.PUT_LINE('----------------------------------------------------');
+
+    LOOP
+        FETCH v_ordenes_cursor INTO v_idOrden, v_fechaSolicitud, v_importeTotal, v_razonSocial;
+        EXIT WHEN v_ordenes_cursor%NOTFOUND;
+        
+        DBMS_OUTPUT.PUT_LINE(
+            RPAD(v_idOrden, 9) || ' | ' ||
+            TO_CHAR(v_fechaSolicitud, 'YYYY-MM-DD') || ' | ' ||
+            LPAD(TO_CHAR(v_importeTotal, 'FM999999990.00'), 13) || ' | ' ||
+            v_razonSocial
+        );
+    END LOOP;
+
+    CLOSE v_ordenes_cursor;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error durante la prueba: ' || SQLERRM);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE SP_ObtenerDetalleOrden (
+    p_idOrden IN Orden.idOrden%TYPE,
+    o_detalle_orden_cursor OUT types.ref_cursor
+)
+AS
+    v_orden_existe NUMBER;
+BEGIN
+    SELECT COUNT(1)
+    INTO v_orden_existe
+    FROM Orden
+    WHERE idOrden = p_idOrden;
+
+    IF v_orden_existe = 0 THEN
+        RAISE_APPLICATION_ERROR(-20008, 'La Orden con ID ' || p_idOrden || ' no existe.');
+    END IF;
+
+    OPEN o_detalle_orden_cursor FOR
+        SELECT
+            do.PRODUCTO_IDPRODUCTO,
+            p.nombreProd,
+            p.unidad,
+            do.CANTIDADDTL,
+            do.PRECIOUNIT,
+            do.SUBTOTALUNIT
+        FROM
+            detalleOrden do
+        JOIN
+            Producto p ON do.PRODUCTO_IDPRODUCTO = p.idProducto
+        WHERE
+            do.ORDEN_IDORDEN = p_idOrden
+        ORDER BY
+            p.nombreProd ASC;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error en SP_ObtenerDetalleOrden: ' || SQLERRM);
+END;
+/
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_detalle_cursor types.ref_cursor;
+    
+    v_idProducto        Producto.idProducto%TYPE;
+    v_nombreProd        Producto.nombreProd%TYPE;
+    v_unidad            Producto.unidad%TYPE;
+    v_cantidadDtl       detalleOrden.CANTIDADDTL%TYPE;
+    v_precioUnitDtl     detalleOrden.PRECIOUNIT%TYPE;
+    v_subtotalUnitDtl   detalleOrden.SUBTOTALUNIT%TYPE;
+
+    v_id_orden_prueba Orden.idOrden%TYPE := 1;
+BEGIN
+    SP_ObtenerDetalleOrden(
+        p_idOrden => v_id_orden_prueba,
+        o_detalle_orden_cursor => v_detalle_cursor
+    );
+
+    DBMS_OUTPUT.PUT_LINE('--- Detalle de la Orden ID: ' || v_id_orden_prueba || ' ---');
+    DBMS_OUTPUT.PUT_LINE('ID Prod | Nombre Producto        | Unidad    | Cantidad | Precio Unit | Subtotal Detalle');
+    DBMS_OUTPUT.PUT_LINE('--------------------------------------------------------------------------------------');
+
+    LOOP
+        FETCH v_detalle_cursor INTO v_idProducto, v_nombreProd, v_unidad, v_cantidadDtl, v_precioUnitDtl, v_subtotalUnitDtl;
+        EXIT WHEN v_detalle_cursor%NOTFOUND;
+        
+        DBMS_OUTPUT.PUT_LINE(
+            RPAD(v_idProducto, 9) || ' | ' ||
+            RPAD(v_nombreProd, 22) || ' | ' ||
+            RPAD(v_unidad, 9) || ' | ' || -- ¡NUEVO!
+            LPAD(v_cantidadDtl, 8) || ' | ' ||
+            LPAD(TO_CHAR(v_precioUnitDtl, 'FM9999990.00'), 11) || ' | ' ||
+            LPAD(TO_CHAR(v_subtotalUnitDtl, 'FM9999990.00'), 16)
+        );
+    END LOOP;
+
+    CLOSE v_detalle_cursor;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error durante la prueba: ' || SQLERRM);
+END;
+/
+set serveroutput on
+BEGIN
+  SP_ObtenerDetalleOrden(1, types.ref_cursor);
+END;
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE SP_ReporteStockPorCategoria (
+    p_idCategoria IN Categoria.idCategoria%TYPE DEFAULT NULL,
+    o_stock_cursor OUT types.ref_cursor
+)
+AS
+BEGIN
+    OPEN o_stock_cursor FOR
+        SELECT
+            c.nombreCategoria,
+            p.nombreProd,
+            p.existencia,
+            p.unidad,
+            p.precioUnit
+        FROM
+            Producto p
+        JOIN
+            Categoria c ON p.CATEGORIA_IDCATEGORIA = c.idCategoria
+        WHERE
+            p.activo = 'S'
+            AND c.activo = 'S'
+            AND (p_idCategoria IS NULL OR c.idCategoria = p_idCategoria)
+        ORDER BY
+            c.nombreCategoria, p.nombreProd;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error en SP_ReporteStockPorCategoria: ' || SQLERRM);
+END;
+/
+SET SERVEROUTPUT ON;
+DECLARE
+    v_stock_cursor      types.ref_cursor;
+    
+    v_nombreCategoria   Categoria.nombreCategoria%TYPE;
+    v_nombreProd        Producto.nombreProd%TYPE;
+    v_existencia        Producto.existencia%TYPE;
+    v_unidad            Producto.unidad%TYPE;
+    v_precioUnit        Producto.precioUnit%TYPE;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('--- Reporte de Stock por Categoría (ID 1) ---');
+    DBMS_OUTPUT.PUT_LINE('Categoría        | Producto               | Existencia | Unidad  | Precio Unit');
+    DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------------------------------');
+
+    SP_ReporteStockPorCategoria(
+        p_idCategoria => 1,
+        o_stock_cursor => v_stock_cursor
+    );
+
+    LOOP
+        FETCH v_stock_cursor INTO v_nombreCategoria, v_nombreProd, v_existencia, v_unidad, v_precioUnit;
+        EXIT WHEN v_stock_cursor%NOTFOUND;
+        
+        DBMS_OUTPUT.PUT_LINE(
+            RPAD(v_nombreCategoria, 17) || ' | ' ||
+            RPAD(v_nombreProd, 22) || ' | ' ||
+            LPAD(v_existencia, 10) || ' | ' ||
+            RPAD(v_unidad, 7) || ' | ' ||
+            LPAD(TO_CHAR(v_precioUnit, 'FM9999990.00'), 11)
+        );
+    END LOOP;
+    CLOSE v_stock_cursor;
+
+    DBMS_OUTPUT.NEW_LINE;
+
+    DBMS_OUTPUT.PUT_LINE('--- Reporte de Stock por TODAS las Categorías ---');
+    DBMS_OUTPUT.PUT_LINE('Categoría        | Producto               | Existencia | Unidad  | Precio Unit');
+    DBMS_OUTPUT.PUT_LINE('-----------------------------------------------------------------------------');
+
+    SP_ReporteStockPorCategoria(
+        o_stock_cursor => v_stock_cursor
+    );
+
+    LOOP
+        FETCH v_stock_cursor INTO v_nombreCategoria, v_nombreProd, v_existencia, v_unidad, v_precioUnit;
+        EXIT WHEN v_stock_cursor%NOTFOUND;
+        
+        DBMS_OUTPUT.PUT_LINE(
+            RPAD(v_nombreCategoria, 17) || ' | ' ||
+            RPAD(v_nombreProd, 22) || ' | ' ||
+            LPAD(v_existencia, 10) || ' | ' ||
+            RPAD(v_unidad, 7) || ' | ' ||
+            LPAD(TO_CHAR(v_precioUnit, 'FM9999990.00'), 11)
+        );
+    END LOOP;
+    CLOSE v_stock_cursor;
+    commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error durante la prueba: ' || SQLERRM);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE sp_alerta_stock_bajo (
+    p_minimo IN NUMBER DEFAULT 50
+) AS
+BEGIN
+    FOR r IN (
+        SELECT p.idProducto, p.nombreProd, p.existencia AS stock_total
+        FROM Producto p
+        WHERE p.existencia < p_minimo
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('⚠ ALERTA: Producto "' || r.nombreProd || '" tiene stock bajo (' || r.stock_total || ' unidades).');
+    END LOOP;
+    commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error en sp_alerta_stock_bajo: ' || SQLERRM);
+END;
+/
+SET SERVEROUTPUT ON;
+BEGIN
+    sp_alerta_stock_bajo(40);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE CambiarDireccionCliente (
+    p_IDCliente IN INTEGER,
+    p_NuevaDireccion IN VARCHAR2
+) AS
+BEGIN
+    UPDATE Cliente
+    SET direccion = p_NuevaDireccion
+    WHERE idCliente = p_IDCliente;
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error inesperado: ' || SQLERRM);
+END;
+/
+SET SERVEROUTPUT ON;
+BEGIN
+    CambiarDireccionCliente(3, 'Nueva Av. Los Olivos 101');
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE CambiarNombreUsuario (
+    p_IDUsuario IN INTEGER,
+    p_NuevoNombre IN VARCHAR2
+) AS
+    v_filas_afectadas INTEGER;
+BEGIN
+    UPDATE Usuario
+    SET nombreUsuario = p_NuevoNombre
+    WHERE idUsuario = p_IDUsuario;
+    v_filas_afectadas := SQL%ROWCOUNT;
+
+    IF v_filas_afectadas = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No se encontró ningún usuario con ID: ' || p_IDUsuario);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Nombre actualizado para el usuario con ID: ' || p_IDUsuario);
+    END IF;
+    COMMIT;
+END;
+/
+SET SERVEROUTPUT ON;
+BEGIN
+    CambiarNombreUsuario(5, 'Luis Hernández Pérez');
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE CambiarLoteProducto (
+    p_IDProducto IN INTEGER,
+    p_NuevoIDLote IN INTEGER
+) AS
+    v_filas_afectadas INTEGER;
+BEGIN
+    UPDATE Producto
+    SET Lote_idLote = p_NuevoIDLote
+    WHERE idProducto = p_IDProducto;
+    v_filas_afectadas := SQL%ROWCOUNT;
+    IF v_filas_afectadas = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No se encontró ningún producto con ID: ' || p_IDProducto);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Lote actualizado para el producto con ID: ' || p_IDProducto);
+    END IF;
+    COMMIT;
+END;
+/
+SET SERVEROUTPUT ON;
+BEGIN
+    CambiarLoteProducto(3, 100);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE AumentarLoteProducto (
+    p_IDProducto IN INTEGER,
+    p_Aumento IN NUMBER
+) AS
+    v_lote_cant_actual number;
+    v_lote_cant_nuevo number;
+    v_idLote integer;
+    v_prod_existe integer;
+BEGIN
+    SELECT COUNT(*) INTO v_prod_existe
+    FROM Producto
+    WHERE idProducto = p_IDProducto;
+
+    IF v_prod_existe = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('El producto con ID ' || p_IDProducto || ' no existe.');
+        RETURN;
+    END IF;
+    
+    select Lote_idLote into v_idLote from Producto where idProducto = p_IDProducto;
+    select existenciaLote into v_lote_cant_actual from Lote where idLote = v_idLote;
+    v_lote_cant_nuevo := v_lote_cant_actual + p_Aumento;
+    
+    update Lote set existenciaLote = v_lote_cant_nuevo where idLote = v_idLote;
+    
+    COMMIT;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('❌ No se encontró el producto con ID: ' || p_IDProducto);
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('⚠️ Error inesperado: ' || SQLERRM);
+END;
+/
+select * from Lote;
+SET SERVEROUTPUT ON;
+BEGIN
+    AumentarLoteProducto(1, 7);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE BuscarMovimiento (
+    p_ProductoID IN INTEGER,
+    p_UsuarioID IN INTEGER
+) AS
+    v_tipoMov       VARCHAR2(50);
+    v_fechaMov      DATE;
+    v_cantidadMov   NUMBER;
+    v_motivo        VARCHAR2(50);
+    v_activo        VARCHAR2(1);
+BEGIN
+    SELECT tipoMov, fechaMov, cantidadMov, motivo, activo
+    INTO   v_tipoMov, v_fechaMov, v_cantidadMov, v_motivo, v_activo
+    FROM   Movimiento
+    WHERE  Producto_idProducto = p_ProductoID
+    AND    Usuario_idUsuario = p_UsuarioID
+    AND    ROWNUM = 1;  -- Por si hay más de un movimiento para el mismo producto y usuario
+    DBMS_OUTPUT.PUT_LINE('Movimiento encontrado:');
+    DBMS_OUTPUT.PUT_LINE('Tipo: ' || v_tipoMov);
+    DBMS_OUTPUT.PUT_LINE('Fecha: ' || TO_CHAR(v_fechaMov, 'DD-MM-YYYY'));
+    DBMS_OUTPUT.PUT_LINE('Cantidad: ' || v_cantidadMov);
+    DBMS_OUTPUT.PUT_LINE('Motivo: ' || v_motivo);
+    DBMS_OUTPUT.PUT_LINE('Activo: ' || v_activo);
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No se encontró movimiento para ese producto y usuario.');
+END;
+/
+SET SERVEROUTPUT ON;
+BEGIN
+    BuscarMovimiento(1, 1);
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE CambiarCodigoBarraProducto (
+    p_IDProducto        IN INTEGER,
+    p_NuevoCodigoBarra IN VARCHAR2
+) AS
+    v_filas_afectadas INTEGER;
+BEGIN
+    IF LENGTH(TRIM(p_NuevoCodigoBarra)) != 13 THEN
+        DBMS_OUTPUT.PUT_LINE('El código de barras debe tener exactamente 13 caracteres.');
+        RETURN;
+    END IF;
+    UPDATE Producto
+    SET codigoBarra = p_NuevoCodigoBarra
+    WHERE idProducto = p_IDProducto;
+    v_filas_afectadas := SQL%ROWCOUNT;
+    IF v_filas_afectadas = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No se encontró el producto con ID: ' || p_IDProducto);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Código de barras actualizado a "' || p_NuevoCodigoBarra || '" para el producto ID: ' || p_IDProducto);
+    END IF;
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error inesperado: ' || SQLERRM);
+END;
+/
+SET SERVEROUTPUT ON;
+BEGIN
+    CambiarCodigoBarraProducto(1, '9876543210123');
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE CambiarDescripcionProducto (
+    p_IDProducto        IN INTEGER,
+    p_NuevaDescripcion IN VARCHAR2
+) AS
+    v_filas_afectadas INTEGER;
+BEGIN
+    UPDATE Producto
+    SET descripcion = p_NuevaDescripcion
+    WHERE idProducto = p_IDProducto;
+    v_filas_afectadas := SQL%ROWCOUNT;
+    
+    IF v_filas_afectadas = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No se encontró el producto con ID: ' || p_IDProducto);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Descripción actualizada a "' || p_NuevaDescripcion || '" para el producto ID: ' || p_IDProducto);
+    END IF;
+    commit;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error inesperado: ' || SQLERRM);
+END;
+/
+SET SERVEROUTPUT ON;
+BEGIN
+    CambiarDescripcionProducto(1, 'Nuevo tomate especial x kg');
+END;
+/
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+unificacion final.sql
+Mostrando unificacion final.sql.
