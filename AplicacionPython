@@ -234,21 +234,53 @@ def insertar_evaluacion():
         conn.commit(); conn.close()
 
 def registrar_movimiento():
-    conn = conectar(); cursor = conn.cursor()
+    from datetime import datetime
+    conn = None
     try:
-        tm = input("Tipo mov.: ")
+        conn = conectar()
+        
+        print("\nREGISTRO DE MOVIMIENTO")
+        print("---------------------")
+        
+        tm = input("Tipo mov. (ENTRADA/SALIDA): ").upper()
+        if tm not in ('ENTRADA', 'SALIDA'):
+            raise ValueError("Tipo de movimiento debe ser ENTRADA o SALIDA")
+        
         fd = input("Fecha mov. (DD-MM-YYYY): ")
+        fecha_dt = datetime.strptime(fd, '%d-%m-%Y')
+        
         ca = int(input("Cantidad: "))
+        if ca <= 0:
+            raise ValueError("La cantidad debe ser positiva")
+        
         mo = input("Motivo: ")
         us = int(input("ID Usuario: "))
         pr = int(input("ID Producto: "))
-        cursor.callproc("sp_registrar_movimiento", [tm, f"TO_DATE('{fd}','DD-MM-YYYY')", ca, mo, us, pr])
-        print("- Movimiento registrado. -")
-    except oracledb.Error as e:
-        print("Error:", e)
+        
+        cursor = conn.cursor()
+        cursor.callproc("sp_registrar_movimiento", [
+            tm,
+            fecha_dt,
+            ca,
+            mo,
+            us,
+            pr
+        ])
+        conn.commit()
+        print("\n✅ Movimiento registrado exitosamente!")
+        
+    except ValueError as ve:
+        print(f"\n❌ Error en los datos: {str(ve)}")
+        if conn: conn.rollback()
+    except oracledb.DatabaseError as e:
+        error, = e.args
+        print(f"\n❌ Error de Oracle (Código {error.code}): {error.message}")
+        if conn: conn.rollback()
+    except Exception as e:
+        print(f"\n❌ Error inesperado: {str(e)}")
+        if conn: conn.rollback()
     finally:
-        conn.commit(); conn.close()
-
+        if conn: conn.close()
 # === ACTUALIZACIONES ===
 
 def cambiar_cod_barra_producto():
