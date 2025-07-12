@@ -1,5 +1,5 @@
 
-import oracledb
+import oracledb ("pip install oracledb") 
 
 # Configuración de conexión
 host = 'localhost'
