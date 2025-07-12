@@ -1396,7 +1396,7 @@ CREATE OR REPLACE PROCEDURE sp_registrar_movimiento(
     p_cantidadMov  IN Movimiento.cantidadMov%TYPE,
     p_motivo       IN Movimiento.motivo%TYPE,
     p_idUsuario    IN Movimiento.Usuario_idUsuario%TYPE,
-    p_idProducto   IN Movimiento.Producto_idProducto%TYPE,
+    p_idProducto   IN Movimiento.Producto_idProducto%TYPE
 )
 AS
 BEGIN
@@ -1909,7 +1909,7 @@ END;
 /
 SET SERVEROUTPUT ON;
 BEGIN
-    CambiarLoteProducto(3, 100);
+    CambiarLoteProducto(2, 10);
 END;
 /
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
