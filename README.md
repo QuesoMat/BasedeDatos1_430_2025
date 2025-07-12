@@ -1,2 +1,1 @@
-Instalar la librería OracleDB
-Abrir cmd e introducir  pip install oracledb
+Instalar la librería OracleDB (abrir cmd e introducir "pip install oracledb")
