@@ -15,20 +15,32 @@ def conectar():
 # === CONSULTAS ===
 
 def consulta_detalle_orden():
-    conn = conectar(); cursor = conn.cursor()
+    conn = None
     try:
+        conn = conectar()
+        cursor = conn.cursor()
+        
         id_orden = int(input("ID de orden: "))
-        out_cur = cursor.var(oracledb.CURSOR)
+        out_cur = conn.cursor()
         cursor.callproc("SP_ObtenerDetalleOrden", [id_orden, out_cur])
-        rows = out_cur.getvalue().fetchall()
+        rows = out_cur.fetchall()
+        
         if not rows:
-            print("⚠️ No se encontraron detalles para esa orden.")
+            print(f"⚠️ No se encontraron detalles para la orden {id_orden}.")
         else:
-            for r in rows: print(r)
+            print("\nDetalles de la orden:")
+            print("ID Prod | Nombre Producto        | Unidad    | Cantidad | Precio Unit | Subtotal")
+            print("-" * 80)
+            for row in rows:
+                print(f"{row[0]:<7} | {row[1]:<20} | {row[2]:<9} | {row[3]:<8} | {row[4]:<10.2f} | {row[5]:<10.2f}")
+                
+    except ValueError:
+        print("❌ Error: El ID de orden debe ser un número entero.")
     except oracledb.Error as e:
-        print("❌", e)
+        print(f"❌ Error de Oracle: {e}")
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 def consulta_ordenes_por_fecha():
     conn = conectar(); cursor = conn.cursor()
