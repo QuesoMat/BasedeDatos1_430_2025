@@ -60,21 +60,39 @@ def consulta_ordenes_por_fecha():
         conn.close()
 
 def consulta_stock_por_categoria():
-    conn = conectar(); cursor = conn.cursor()
+    conn = None
     try:
-        cat = input("ID categoría (vacío=all): ").strip()
+        conn = conectar()
+        cursor = conn.cursor()
+        
+        cat = input("ID categoría (vacío para todas): ").strip()
         idc = int(cat) if cat else None
-        out_cur = cursor.var(oracledb.CURSOR)
-        cursor.callproc("SP_ReporteStockPorCategoria", [idc, out_cur])
-        rows = out_cur.getvalue().fetchall()
-        if not rows:
-            print("⚠️ No hay stock para esa categoría.")
+        out_cursor = conn.cursor()
+        if idc is not None:
+            cursor.callproc("SP_ReporteStockPorCategoria", [idc, out_cursor])
         else:
-            for r in rows: print(r)
+            cursor.callproc("SP_ReporteStockPorCategoria", [None, out_cursor])
+        rows = out_cursor.fetchall()
+        
+        if not rows:
+            print("⚠️ No se encontraron productos para los criterios especificados.")
+            return
+        print("\nReporte de Stock por Categoría:")
+        print("Categoría        | Producto               | Existencia | Unidad  | Precio Unit")
+        print("-" * 80)
+        
+        for row in rows:
+            print(f"{row[0]:<17} | {row[1]:<22} | {row[2]:<10} | {row[3]:<7} | {row[4]:<10.2f}")
+    except ValueError:
+        print("❌ Error: El ID de categoría debe ser un número entero.")
     except oracledb.Error as e:
-        print("❌", e)
+        print(f"❌ Error de Oracle: {e}")
+        error_obj, = e.args
+        print(f"Código: {error_obj.code}")
+        print(f"Mensaje: {error_obj.message}")
     finally:
-        conn.close()
+        if conn:
+            conn.close()
 
 def consulta_info_producto():
     conn = conectar(); cursor = conn.cursor()
